@@ -1,0 +1,12 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "post_mortem:lifegem"
+        }
+    ],
+    "result": {
+        "id": "post_mortem:lifesalt",
+        "count": 5
+    }
+}
