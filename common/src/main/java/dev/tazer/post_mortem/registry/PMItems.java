@@ -2,6 +2,7 @@ package dev.tazer.post_mortem.registry;
 
 import dev.tazer.post_mortem.common.block.GravestoneBlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,10 @@ public class PMItems {
     public static final List<Item> ITEMS = new ArrayList<>();
 
     public static final GravestoneBlockItem GRAVESTONE = registerItem("gravestone", new GravestoneBlockItem(PMBlocks.GRAVESTONE, new Properties()));
+
+    public static final Item LIFEGEM = registerItem("lifegem", new Item(new Properties().rarity(Rarity.EPIC)));
+
+    public static final Item LIFESALT = registerItem("lifesalt", new Item(new Properties().rarity(Rarity.UNCOMMON)));
 
     public static void register() {}
 }

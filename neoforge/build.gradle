@@ -21,8 +21,7 @@ neoForge {
         }
         client {
             client()
-            devLogin = true
-            jvmArgument('-XX:+AllowEnhancedClassRedefinition')
+//            devLogin = true
         }
         data {
             data()
