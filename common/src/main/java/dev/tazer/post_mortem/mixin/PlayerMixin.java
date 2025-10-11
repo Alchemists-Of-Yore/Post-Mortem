@@ -4,7 +4,9 @@ import dev.tazer.post_mortem.common.entity.IPlayerExtension;
 import dev.tazer.post_mortem.common.entity.PlayerUtil;
 import dev.tazer.post_mortem.common.entity.SoulState;
 import dev.tazer.post_mortem.common.entity.Spectre;
-import dev.tazer.post_mortem.registry.PMDataSerializers;
+import dev.tazer.post_mortem.networking.GraveRequestPayload;
+import dev.tazer.post_mortem.platform.Services;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -16,6 +18,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,10 +32,10 @@ import java.util.Map;
 public abstract class PlayerMixin extends LivingEntityMixin implements IPlayerExtension, Spectre {
 
     @Unique
-    private final Player th$player = (Player) (Object) this;
+    private final Player pm$player = (Player) (Object) this;
 
-    @Unique
-    private static final EntityDataAccessor<SoulState> SOUL_STATE = SynchedEntityData.defineId(Player.class, PMDataSerializers.SOUL_STATE);
+    @Unique @Nullable
+    protected GlobalPos grave = null;
 
     @Inject(method = "defineSynchedData", at = @At("TAIL"))
     private void defineSoulStateData(SynchedEntityData.Builder builder, CallbackInfo ci) {
@@ -50,25 +53,81 @@ public abstract class PlayerMixin extends LivingEntityMixin implements IPlayerEx
     }
 
     @Override
+    protected void onSyncedDataUpdated(EntityDataAccessor<?> key, CallbackInfo ci) {
+        super.onSyncedDataUpdated(key, ci);
+
+        if (key.equals(SOUL_STATE)) {
+            SoulState soulState = getSoulState();
+
+            switch (soulState) {
+                case DOWNED -> {
+                    AttributeMap attributeMap = pm$player.getAttributes();
+
+                    Map<Holder<Attribute>, Double> newAttributeMap = Map.of(
+                            Attributes.MAX_HEALTH, -14D,
+                            Attributes.MOVEMENT_SPEED, -0.06,
+                            Attributes.ENTITY_INTERACTION_RANGE, -3D,
+                            Attributes.BLOCK_INTERACTION_RANGE, -4.5D
+                    );
+
+                    for(Map.Entry<Holder<Attribute>, Double> entry : newAttributeMap.entrySet()) {
+                        AttributeInstance attributeinstance = attributeMap.getInstance(entry.getKey());
+                        if (attributeinstance != null) {
+                            attributeinstance.removeModifiers();
+                            attributeinstance.addPermanentModifier(new AttributeModifier(ResourceLocation.parse(entry.getKey().getRegisteredName()), entry.getValue(), AttributeModifier.Operation.ADD_VALUE));
+                        }
+                    }
+
+                    pm$player.setHealth(pm$player.getMaxHealth());
+                    setSoulState(SoulState.DOWNED);
+                }
+                case ETHEREAL -> {
+                    AttributeMap attributeMap = pm$player.getAttributes();
+
+                    Map<Holder<Attribute>, Double> newAttributeMap = Map.of(
+                            Attributes.MAX_HEALTH, -10D
+                    );
+
+                    for(Map.Entry<Holder<Attribute>, Double> entry : newAttributeMap.entrySet()) {
+                        AttributeInstance attributeinstance = attributeMap.getInstance(entry.getKey());
+                        if (attributeinstance != null) {
+                            attributeinstance.removeModifiers();
+                            attributeinstance.addPermanentModifier(new AttributeModifier(ResourceLocation.parse(entry.getKey().getRegisteredName()), entry.getValue(), AttributeModifier.Operation.ADD_VALUE));
+                        }
+                    }
+
+                    pm$player.setHealth(pm$player.getMaxHealth());
+                    setSoulState(SoulState.DOWNED);
+                }
+                default -> PlayerUtil.resetAttributes(pm$player);
+            }
+        }
+    }
+
+    @Override
     public SoulState getSoulState() {
-        return th$player.getEntityData().get(SOUL_STATE);
+        return pm$player.getEntityData().get(SOUL_STATE);
     }
 
     @Override
     public void setSoulState(SoulState soulState) {
-        th$player.getEntityData().set(SOUL_STATE, soulState);
+        pm$player.getEntityData().set(SOUL_STATE, soulState);
+    }
+
+    @Override
+    public @Nullable GlobalPos getGrave() {
+        if (grave == null && pm$player.level().isClientSide()) Services.PLATFORM.sendToServer(new GraveRequestPayload());
+        return grave;
     }
 
     @Override
     protected ItemStack th$findTotem() {
-        if (getSoulState() == SoulState.DOWNED) {
-            Inventory inventory = th$player.getInventory();
-            for (int i = 0; i < inventory.items.size(); ++i) {
-                ItemStack stack = inventory.items.get(i);
-                if (stack.is(Items.TOTEM_OF_UNDYING)) {
-                    stack.shrink(1);
-                    return stack;
-                }
+        Inventory inventory = pm$player.getInventory();
+        for (int i = 0; i < inventory.items.size(); ++i) {
+            ItemStack stack = inventory.items.get(i);
+            if (stack.is(Items.TOTEM_OF_UNDYING)) {
+                stack.shrink(1);
+                return stack;
             }
         }
 
@@ -77,46 +136,23 @@ public abstract class PlayerMixin extends LivingEntityMixin implements IPlayerEx
 
     @Override
     protected boolean th$shouldStayAlive(DamageSource damageSource) {
-        if (getSoulState() == SoulState.ALIVE && lastHurt <= th$player.getMaxHealth() + 8) {
-            transitionTo(SoulState.DOWNED);
-            return true;
-        }
+        SoulState soulState = getSoulState();
 
-        transitionTo(SoulState.SPECTRE);
-        return false;
-    }
+        setSoulState(SoulState.SPECTRE);
 
-    @Override
-    public void transitionTo(SoulState soulState) {
-        setSoulState(soulState);
-
-        switch (soulState) {
-            case DOWNED -> {
-                AttributeMap attributeMap = th$player.getAttributes();
-
-                Map<Holder<Attribute>, Double> newAttributeMap = Map.of(
-                        Attributes.MAX_HEALTH, -14D,
-                        Attributes.MOVEMENT_SPEED, -0.06,
-                        Attributes.ENTITY_INTERACTION_RANGE, -3D,
-                        Attributes.BLOCK_INTERACTION_RANGE, -4.5D
-                );
-
-                for(Map.Entry<Holder<Attribute>, Double> entry : newAttributeMap.entrySet()) {
-                    AttributeInstance attributeinstance = attributeMap.getInstance(entry.getKey());
-                    if (attributeinstance != null) {
-                        attributeinstance.removeModifiers();
-                        attributeinstance.addPermanentModifier(new AttributeModifier(ResourceLocation.parse(entry.getKey().getRegisteredName()), entry.getValue(), AttributeModifier.Operation.ADD_VALUE));
-                    }
-                }
-
-                th$player.setHealth(th$player.getMaxHealth());
-                setSoulState(SoulState.DOWNED);
+        return switch (soulState) {
+            case ALIVE -> {
+                if (lastHurt <= pm$player.getMaxHealth() + 20) {
+                    setSoulState(SoulState.DOWNED);
+                    yield true;
+                } else yield false;
             }
-            case POSSESSING -> {
-                // code to make player GONE
+            case ETHEREAL -> {
+                pm$player.getInventory().dropAll();
+                yield true;
             }
-            default -> PlayerUtil.resetAttributes(th$player);
-        }
+            default -> false;
+        };
     }
 
     @Override
@@ -132,8 +168,16 @@ public abstract class PlayerMixin extends LivingEntityMixin implements IPlayerEx
     @Inject(method = "updateSwimming", at = @At("HEAD"), cancellable = true)
     private void swimIfDowned(CallbackInfo ci) {
         if (getSoulState() == SoulState.DOWNED) {
-            th$player.setSwimming(true);
+            pm$player.setSwimming(true);
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
+    private void notHurtIfSpectre(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        if (getSoulState() == SoulState.SPECTRE) {
+            cir.setReturnValue(false);
+            cir.cancel();
         }
     }
 }

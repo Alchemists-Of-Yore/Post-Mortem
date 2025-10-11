@@ -1,4 +1,4 @@
-package dev.tazer.post_mortem.common.block;
+package dev.tazer.post_mortem.common.item;
 
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.context.BlockPlaceContext;

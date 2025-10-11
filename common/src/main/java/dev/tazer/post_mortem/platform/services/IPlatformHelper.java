@@ -1,5 +1,8 @@
 package dev.tazer.post_mortem.platform.services;
 
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
+
 public interface IPlatformHelper {
 
     /**
@@ -30,7 +33,10 @@ public interface IPlatformHelper {
      * @return The name of the environment type.
      */
     default String getEnvironmentName() {
-
         return isDevelopmentEnvironment() ? "development" : "production";
     }
+
+    void sendToServer(CustomPacketPayload payload);
+
+    void sendToClient(ServerPlayer player, CustomPacketPayload payload);
 }

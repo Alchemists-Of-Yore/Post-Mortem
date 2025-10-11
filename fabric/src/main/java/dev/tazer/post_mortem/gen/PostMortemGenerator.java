@@ -1,4 +1,4 @@
-package dev.tazer.post_mortem.data;
+package dev.tazer.post_mortem.gen;
 
 import dev.tazer.post_mortem.PostMortem;
 import dev.tazer.post_mortem.registry.PMBlocks;
@@ -42,6 +42,12 @@ public class PostMortemGenerator implements DataGeneratorEntrypoint {
             }
 
             translationBuilder.add(PostMortem.MOD_ID + ".itemGroup.tab", "Post Mortem");
+            translationBuilder.add("death.attack." + PostMortem.MOD_ID + ".bleed", "%1$s bled out");
+            translationBuilder.add("death.attack." + PostMortem.MOD_ID + ".bleed.player", "%1$s bled out");
+
+            translationBuilder.add(PostMortem.MOD_ID + ".anchor_type.spawn_point", "Haunt Spawn Point");
+            translationBuilder.add(PostMortem.MOD_ID + ".anchor_type.death_point", "Haunt Death Point");
+            translationBuilder.add(PostMortem.MOD_ID + ".anchor_type.gravestone", "Haunt Gravestone");
         }
 
         private static String langKey(Block block) {

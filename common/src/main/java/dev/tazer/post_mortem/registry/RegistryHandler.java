@@ -74,7 +74,7 @@ public class RegistryHandler {
         }
 
         if (key.equals(BuiltInRegistries.CREATIVE_MODE_TAB.key())) {
-//            THTabs.register();
+            PMTabs.register();
         }
     }
 }

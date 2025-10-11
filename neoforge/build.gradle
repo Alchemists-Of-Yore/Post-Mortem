@@ -5,10 +5,14 @@ plugins {
 
 neoForge {
     version = neoforge_version
-    // Automatically enable neoforge access transformers if the file exists
-    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    // Automatically enable access transformer and interface injection if the files exist
+    def at = project(':common').file('src/main/resources/accesstransformer.cfg')
     if (at.exists()) {
         accessTransformers.from(at.absolutePath)
+    }
+    def ii = project(':common').file('src/main/resources/interfaces.json')
+    if (ii.exists()) {
+        interfaceInjectionData.from(ii.absolutePath)
     }
     parchment {
         minecraftVersion = parchment_minecraft

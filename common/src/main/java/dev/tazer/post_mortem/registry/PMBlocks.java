@@ -13,7 +13,7 @@ import static net.minecraft.world.level.block.state.BlockBehaviour.Properties.of
 public class PMBlocks {
     public static final List<Block> BLOCKS = new ArrayList<>();
 
-    public static final GravestoneBlock GRAVESTONE = registerBlock("gravestone", new GravestoneBlock(ofFullCopy(Blocks.STONE)), false);
+    public static final GravestoneBlock GRAVESTONE = registerBlock("gravestone", new GravestoneBlock(ofFullCopy(Blocks.STONE).noOcclusion()), false);
 
     public static void register() {}
 }

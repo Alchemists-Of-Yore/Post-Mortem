@@ -1,7 +1,5 @@
 package dev.tazer.post_mortem.common.entity;
 
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -28,9 +26,5 @@ public class PlayerUtil {
                 attributeinstance.removeModifiers();
             }
         }
-    }
-
-    public static void renderDownedBar(GuiGraphics guiGraphics, DeltaTracker deltaTracker, Player player) {
-        float partialTick = deltaTracker.getGameTimeDeltaPartialTick(true);
     }
 }

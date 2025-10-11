@@ -1,0 +1,9 @@
+{
+  "net/minecraft/world/entity/player/Player": [
+    "dev/tazer/post_mortem/common/entity/IPlayerExtension",
+    "dev/tazer/post_mortem/common/entity/Spectre"
+  ],
+  "net/minecraft/client/gui/Gui": [
+    "dev/tazer/post_mortem/client/IGuiExtension"
+  ]
+}

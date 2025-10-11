@@ -1,4 +1,11 @@
 {
   "block.post_mortem.gravestone": "Gravestone",
+  "death.attack.post_mortem.bleed": "%1$s bled out",
+  "death.attack.post_mortem.bleed.player": "%1$s bled out",
+  "item.post_mortem.lifegem": "Lifegem",
+  "item.post_mortem.lifesalt": "Lifesalt",
+  "post_mortem.anchor_type.death_point": "Haunt Death Point",
+  "post_mortem.anchor_type.gravestone": "Haunt Gravestone",
+  "post_mortem.anchor_type.spawn_point": "Haunt Spawn Point",
   "post_mortem.itemGroup.tab": "Post Mortem"
 }

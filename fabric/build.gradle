@@ -13,8 +13,8 @@ dependencies {
 }
 
 loom {
-    // Automatically enable fabric access wideners if the file exists
-    def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
+    // Automatically enable access widener if the file exists
+    def aw = file("src/main/resources/${mod_id}.accesswidener")
     if (aw.exists()) {
         accessWidenerPath.set(aw)
     }

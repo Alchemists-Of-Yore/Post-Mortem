@@ -1,7 +1,6 @@
 package dev.tazer.post_mortem.common.block;
 
 import com.mojang.serialization.MapCodec;
-import dev.tazer.post_mortem.common.entity.IPlayerExtension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -137,7 +136,7 @@ public class GravestoneBlock extends HorizontalDirectionalBlock {
                 }
             }
 
-            if (canSetGrave(level)) ((IPlayerExtension) player).setGrave(GlobalPos.of(level.dimension(), pos));
+            if (canSetGrave(level)) player.setGrave(GlobalPos.of(level.dimension(), pos));
 
             return InteractionResult.SUCCESS;
         }

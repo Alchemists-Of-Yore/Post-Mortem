@@ -36,8 +36,8 @@ public record SpectreAnchor(UUID uuid, GlobalPos pos) {
     }
 
     /**
-     * @param level The level the anchor is in
-     * @return The centre of the anchor, or null if the anchor is not in this level
+     * @param level The level the anchorType is in
+     * @return The centre of the anchorType, or null if the anchorType is not in this level
      */
     public Vec3 getCentre(ServerLevel level) {
         Entity entity = level.getEntity(uuid);
