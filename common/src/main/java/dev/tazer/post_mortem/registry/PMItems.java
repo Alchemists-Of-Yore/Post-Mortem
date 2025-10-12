@@ -1,7 +1,7 @@
 package dev.tazer.post_mortem.registry;
 
-import dev.tazer.post_mortem.common.item.GravestoneBlockItem;
-import dev.tazer.post_mortem.common.item.LifegemItem;
+import dev.tazer.post_mortem.item.GravestoneBlockItem;
+import dev.tazer.post_mortem.item.LifegemItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 

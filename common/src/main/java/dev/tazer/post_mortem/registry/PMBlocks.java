@@ -1,6 +1,6 @@
 package dev.tazer.post_mortem.registry;
 
-import dev.tazer.post_mortem.common.block.GravestoneBlock;
+import dev.tazer.post_mortem.block.GravestoneBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 

@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class SpectreGui {
+public class SpiritGui {
     private static final long FADE_OUT_DELAY = 5000L;
     private static final long FADE_OUT_TIME = 2000L;
 
@@ -25,9 +25,9 @@ public class SpectreGui {
     private float currentY;
 
     @Nullable
-    private SpectreMenu menu;
+    private SpiritMenu menu;
 
-    public SpectreGui(Minecraft minecraft) {
+    public SpiritGui(Minecraft minecraft) {
         this.minecraft = minecraft;
         menu = null;
     }
@@ -35,17 +35,17 @@ public class SpectreGui {
     public void onHotbarSelected(int slot) {
         lastSelectionTime = Util.getMillis();
         if (menu != null) {
-            SpectreMenuItem spectreMenuItem = menu.items.get(slot);
-            if (menu.selectedSlot == slot && spectreMenuItem.isEnabled()) {
+            SpiritMenuItem spiritMenuItem = menu.items.get(slot);
+            if (menu.selectedSlot == slot && spiritMenuItem.isEnabled()) {
                 heldTicks++;
                 if (heldTicks == 20) {
-                    spectreMenuItem.selectItem(menu);
+                    spiritMenuItem.selectItem(menu);
                     heldTicks = 0;
                 }
             } else heldTicks = 0;
 
         } else {
-            menu = new SpectreMenu();
+            menu = new SpiritMenu();
         }
 
         menu.selectSlot(slot);
@@ -64,6 +64,7 @@ public class SpectreGui {
     }
 
     public void renderHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+        // TODO: fix alpha
         if (menu != null) {
             float alpha = getHotbarAlpha();
             if (alpha <= 0) {
@@ -78,7 +79,7 @@ public class SpectreGui {
                 int selectedIndex = menu.selectedSlot;
                 int centreX = guiGraphics.guiWidth() / 2 - 8;
                 int spacing = 22;
-                List<SpectreMenuItem> items = menu.items;
+                List<SpiritMenuItem> items = menu.items;
 
                 float smoothing = 1 - (float) Math.exp(-5 * partialTick);
                 currentIndex = Mth.lerp(smoothing, currentIndex, selectedIndex);
@@ -86,12 +87,10 @@ public class SpectreGui {
 
                 int startX = Mth.floor(centreX - currentIndex * spacing);
 
-                RenderSystem.enableBlend();
-                guiGraphics.setColor(1, 1, 1, alpha);
-
                 for (int index = 0; index < items.size(); index++) {
                     int x = startX + index * spacing;
                     items.get(index).renderIcon(guiGraphics, x, y);
+                    RenderSystem.enableBlend();
                     guiGraphics.blit(background, x, y, 0, 0, 16, 16, 16, 16);
                 }
 
@@ -104,7 +103,7 @@ public class SpectreGui {
     public void renderTooltip(GuiGraphics guiGraphics) {
         int a = (int) (getHotbarAlpha() * 255.0F);
         if (a > 3 && menu != null) {
-            SpectreMenuItem item = menu.getSelectedItem();
+            SpiritMenuItem item = menu.getSelectedItem();
             Component text = item.getName();
             if (text != null) {
                 int w = minecraft.font.width(text);
@@ -135,9 +134,9 @@ public class SpectreGui {
     public void onMouseMiddleClick() {
         lastSelectionTime = Util.getMillis();
         if (menu != null) {
-            SpectreMenuItem spectreMenuItem = menu.getSelectedItem();
-            if (spectreMenuItem.isEnabled()) {
-                spectreMenuItem.selectItem(menu);
+            SpiritMenuItem spiritMenuItem = menu.getSelectedItem();
+            if (spiritMenuItem.isEnabled()) {
+                spiritMenuItem.selectItem(menu);
             }
 
             heldTicks = 0;

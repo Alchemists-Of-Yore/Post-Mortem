@@ -1,14 +1,10 @@
-package dev.tazer.post_mortem.common.entity;
+package dev.tazer.post_mortem.mixininterface;
 
-import dev.tazer.post_mortem.registry.PMDataSerializers;
+import dev.tazer.post_mortem.entity.SoulState;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
-public interface IPlayerExtension {
-     EntityDataAccessor<SoulState> SOUL_STATE = SynchedEntityData.defineId(Player.class, PMDataSerializers.SOUL_STATE);
+public interface PlayerExtension {
 
     /**
      * @return The player's current {@link SoulState}

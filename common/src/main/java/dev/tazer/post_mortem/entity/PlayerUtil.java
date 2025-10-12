@@ -1,4 +1,4 @@
-package dev.tazer.post_mortem.common.entity;
+package dev.tazer.post_mortem.entity;
 
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;

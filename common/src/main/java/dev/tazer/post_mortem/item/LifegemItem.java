@@ -1,6 +1,6 @@
-package dev.tazer.post_mortem.common.item;
+package dev.tazer.post_mortem.item;
 
-import dev.tazer.post_mortem.common.entity.SoulState;
+import dev.tazer.post_mortem.entity.SoulState;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -17,8 +17,8 @@ public class LifegemItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         SoulState newState = switch (player.getSoulState()) {
             case ALIVE -> SoulState.DOWNED;
-            case DOWNED -> SoulState.SPECTRE;
-            case SPECTRE -> SoulState.ETHEREAL;
+            case DOWNED -> SoulState.SPIRIT;
+            case SPIRIT -> SoulState.MANIFESTATION;
             default -> SoulState.ALIVE;
         };
 

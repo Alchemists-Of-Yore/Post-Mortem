@@ -3,12 +3,12 @@ package dev.tazer.post_mortem.client;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpectreMenu {
-    public final List<SpectreMenuItem> items;
+public class SpiritMenu {
+    public final List<SpiritMenuItem> items;
     public int selectedSlot = 0;
     public float currentIndex = selectedSlot;
 
-    public SpectreMenu() {
+    public SpiritMenu() {
         items = new ArrayList<>(2);
 
         items.add(new DeathPointMenuItem());
@@ -16,7 +16,7 @@ public class SpectreMenu {
         items.add(new GravestoneMenuItem());
     }
 
-    public SpectreMenuItem getSelectedItem() {
+    public SpiritMenuItem getSelectedItem() {
         return items.get(selectedSlot);
     }
 

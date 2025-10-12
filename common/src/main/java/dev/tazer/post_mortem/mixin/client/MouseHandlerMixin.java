@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.tazer.post_mortem.common.entity.SoulState;
+import dev.tazer.post_mortem.entity.SoulState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.world.entity.player.Inventory;
@@ -20,16 +20,16 @@ public class MouseHandlerMixin {
     private Minecraft minecraft;
 
     @WrapOperation(method = "onScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;swapPaint(D)V"))
-    private void scrollSpectreMenu(Inventory instance, double direction, Operation<Void> original, @Local(ordinal = 2) int k) {
-        if (minecraft.player.getSoulState() == SoulState.SPECTRE) {
-            minecraft.gui.getSpectreGui().onMouseScrolled(-k);
+    private void scrollSpiritMenu(Inventory instance, double direction, Operation<Void> original, @Local(ordinal = 2) int k) {
+        if (minecraft.player.getSoulState() == SoulState.SPIRIT) {
+            minecraft.gui.getSpiritGui().onMouseScrolled(-k);
         } else original.call(instance, direction);
     }
 
     @WrapOperation(method = "onPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;click(Lcom/mojang/blaze3d/platform/InputConstants$Key;)V"))
-    private void presssSpectreMenu(InputConstants.Key key, Operation<Void> original, @Local(ordinal = 3) int i) {
-        if (minecraft.player.getSoulState() == SoulState.SPECTRE && i == 2) {
-            minecraft.gui.getSpectreGui().onMouseMiddleClick();
+    private void pressSpiritMenu(InputConstants.Key key, Operation<Void> original, @Local(ordinal = 3) int i) {
+        if (minecraft.player.getSoulState() == SoulState.SPIRIT && i == 2) {
+            minecraft.gui.getSpiritGui().onMouseMiddleClick();
         } else original.call(key);
     }
 }

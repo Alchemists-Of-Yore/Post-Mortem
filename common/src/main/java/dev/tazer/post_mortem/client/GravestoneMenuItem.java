@@ -1,7 +1,7 @@
 package dev.tazer.post_mortem.client;
 
 import dev.tazer.post_mortem.PostMortem;
-import dev.tazer.post_mortem.common.entity.AnchorType;
+import dev.tazer.post_mortem.entity.AnchorType;
 import dev.tazer.post_mortem.networking.TeleportToAnchorPayload;
 import dev.tazer.post_mortem.platform.Services;
 import dev.tazer.post_mortem.registry.PMItems;
@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-public class GravestoneMenuItem implements SpectreMenuItem {
+public class GravestoneMenuItem implements SpiritMenuItem {
     public final Player player;
 
     public GravestoneMenuItem() {
@@ -19,7 +19,7 @@ public class GravestoneMenuItem implements SpectreMenuItem {
     }
 
     @Override
-    public void selectItem(SpectreMenu menu) {
+    public void selectItem(SpiritMenu menu) {
         Services.PLATFORM.sendToServer(new TeleportToAnchorPayload(AnchorType.GRAVESTONE));
     }
 

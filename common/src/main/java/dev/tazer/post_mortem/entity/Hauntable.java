@@ -1,4 +1,4 @@
-package dev.tazer.post_mortem.common.entity;
+package dev.tazer.post_mortem.entity;
 
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 public interface Hauntable {
     boolean isHaunted();
 
-    @Nullable Player getSpectre();
+    @Nullable Player getSpirit();
 
-    void kickSpectre();
+    void kickSpirit();
 }

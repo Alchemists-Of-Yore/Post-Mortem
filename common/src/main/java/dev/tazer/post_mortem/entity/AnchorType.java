@@ -1,4 +1,4 @@
-package dev.tazer.post_mortem.common.entity;
+package dev.tazer.post_mortem.entity;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

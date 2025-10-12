@@ -48,6 +48,8 @@ public class PostMortemGenerator implements DataGeneratorEntrypoint {
             translationBuilder.add(PostMortem.MOD_ID + ".anchor_type.spawn_point", "Haunt Spawn Point");
             translationBuilder.add(PostMortem.MOD_ID + ".anchor_type.death_point", "Haunt Death Point");
             translationBuilder.add(PostMortem.MOD_ID + ".anchor_type.gravestone", "Haunt Gravestone");
+
+            translationBuilder.add(PostMortem.MOD_ID + ".grave.set", "Haunting point set");
         }
 
         private static String langKey(Block block) {

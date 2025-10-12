@@ -7,5 +7,6 @@
   "post_mortem.anchor_type.death_point": "Haunt Death Point",
   "post_mortem.anchor_type.gravestone": "Haunt Gravestone",
   "post_mortem.anchor_type.spawn_point": "Haunt Spawn Point",
+  "post_mortem.grave.set": "Haunting point set",
   "post_mortem.itemGroup.tab": "Post Mortem"
 }

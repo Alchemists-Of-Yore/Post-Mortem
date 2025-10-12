@@ -37,11 +37,11 @@
   "custom": {
     "loom:injected_interfaces": {
       "net/minecraft/world/entity/player/Player": [
-        "dev/tazer/post_mortem/common/entity/IPlayerExtension",
-        "dev/tazer/post_mortem/common/entity/Spectre"
+        "dev/tazer/post_mortem/mixininterface/PlayerExtension",
+        "dev/tazer/post_mortem/mixininterface/Spirit"
       ],
       "net/minecraft/client/gui/Gui": [
-        "dev/tazer/post_mortem/client/IGuiExtension"
+        "dev/tazer/post_mortem/mixininterface/client/GuiExtension"
       ]
     }
   }

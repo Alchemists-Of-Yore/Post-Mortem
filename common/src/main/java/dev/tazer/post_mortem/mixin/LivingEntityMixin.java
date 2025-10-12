@@ -1,7 +1,6 @@
 package dev.tazer.post_mortem.mixin;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -15,42 +14,38 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin {
+public abstract class LivingEntityMixin extends EntityMixin {
 
     @Shadow
     protected float lastHurt;
 
-    @Shadow
-    protected abstract void dropAllDeathLoot(ServerLevel level, DamageSource damageSource);
-
     @Inject(method = "checkTotemDeathProtection", at = @At("RETURN"), cancellable = true)
-    private void shouldStayAlive(DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
-        if (!cir.getReturnValue()) {
-            cir.setReturnValue(th$shouldStayAlive(damageSource));
-        }
+    private void pm$shouldStayAlive(DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
+        if (!cir.getReturnValue()) cir.setReturnValue(shouldStayAlive(damageSource));
     }
 
     @ModifyVariable(method = "checkTotemDeathProtection", at = @At(value = "STORE", ordinal = 0), ordinal = 0)
-    protected ItemStack findTotem(ItemStack original) {
+    protected ItemStack pm$findTotem(ItemStack original) {
         if (original != null) return original;
 
-        ItemStack totem = th$findTotem();
+        ItemStack totem = findTotem();
         return totem.isEmpty() ? null : totem;
     }
 
     @Inject(method = "canBeSeenByAnyone", at = @At("RETURN"), cancellable = true)
-    protected void th$canBeSeenByAnyone(CallbackInfoReturnable<Boolean> cir) {}
+    protected void pm$canBeSeenByAnyone(CallbackInfoReturnable<Boolean> cir) {}
 
     @Inject(method = "onSyncedDataUpdated", at = @At("TAIL"))
-    protected void onSyncedDataUpdated(EntityDataAccessor<?> key, CallbackInfo ci) {}
+    protected void pm$onSyncedDataUpdated(EntityDataAccessor<?> key, CallbackInfo ci) {}
 
     @Unique
-    protected ItemStack th$findTotem() {
+    protected ItemStack findTotem() {
         return ItemStack.EMPTY;
     }
 
     @Unique
-    protected boolean th$shouldStayAlive(DamageSource damageSource) {
+    protected boolean shouldStayAlive(DamageSource damageSource) {
         return false;
     }
+
 }

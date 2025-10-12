@@ -46,7 +46,7 @@ public abstract class DeathScreenMixin extends ScreenMixin {
     private int delayTicker;
 
     @Inject(method = "init", at = @At("HEAD"), cancellable = true)
-    private void init(CallbackInfo ci) {
+    private void pm$init(CallbackInfo ci) {
         delayTicker = 0;
         exitButtons.clear();
         exitButtons.add(addRenderableWidget(Button.builder(Component.translatable("deathScreen.respawn"),
@@ -65,7 +65,7 @@ public abstract class DeathScreenMixin extends ScreenMixin {
     }
     
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V", shift = At.Shift.AFTER), cancellable = true)
-    private void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
+    private void pm$render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().scale(3, 3, 3);
         guiGraphics.drawCenteredString(font, title, width / 2 / 3, 30, 16777215);
