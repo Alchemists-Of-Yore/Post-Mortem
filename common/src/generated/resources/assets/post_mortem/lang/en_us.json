@@ -1,5 +1,6 @@
 {
   "block.post_mortem.gravestone": "Gravestone",
+  "block.post_mortem.surgical_altar": "Surgical Altar",
   "death.attack.post_mortem.bleed": "%1$s bled out",
   "death.attack.post_mortem.bleed.player": "%1$s bled out",
   "item.post_mortem.lifegem": "Lifegem",

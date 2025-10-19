@@ -15,7 +15,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.DoubleBlockCombiner;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -77,23 +76,6 @@ public class GravestoneBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide && player.isCreative()) {
-            BedPart part = state.getValue(PART);
-            if (part == BedPart.FOOT) {
-                BlockPos blockpos = pos.relative(getNeighbourDirection(part, state.getValue(FACING)));
-                BlockState blockstate = level.getBlockState(blockpos);
-                if (blockstate.is(this) && blockstate.getValue(PART) == BedPart.HEAD) {
-                    level.setBlock(blockpos, Blocks.AIR.defaultBlockState(), 35);
-                    level.levelEvent(player, 2001, blockpos, Block.getId(blockstate));
-                }
-            }
-        }
-
-        return super.playerWillDestroy(level, pos, state, player);
-    }
-
-    @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         Direction direction = context.getHorizontalDirection();
         BlockPos pos = context.getClickedPos();
@@ -119,11 +101,6 @@ public class GravestoneBlock extends HorizontalDirectionalBlock {
         return state.getValue(PART) == BedPart.HEAD ? direction.getOpposite() : direction;
     }
 
-    public static DoubleBlockCombiner.BlockType getBlockType(BlockState state) {
-        BedPart bedpart = state.getValue(PART);
-        return bedpart == BedPart.HEAD ? DoubleBlockCombiner.BlockType.FIRST : DoubleBlockCombiner.BlockType.SECOND;
-    }
-
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (level.isClientSide) {
@@ -137,16 +114,10 @@ public class GravestoneBlock extends HorizontalDirectionalBlock {
                 }
             }
 
-            if (canSetGrave(level)) {
-                player.setGrave(GlobalPos.of(level.dimension(), pos));
-                player.displayClientMessage(PostMortem.lang("grave.set"), false);
-            }
+            player.setGrave(GlobalPos.of(level.dimension(), pos));
+            player.displayClientMessage(PostMortem.lang("grave.set"), false);
 
             return InteractionResult.SUCCESS;
         }
-    }
-
-    public static boolean canSetGrave(Level level) {
-        return true;
     }
 }

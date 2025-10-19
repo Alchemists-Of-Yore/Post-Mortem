@@ -69,7 +69,8 @@ public class MinecraftMixin {
             return InteractionResult.FAIL;
         }
 
-        lastUsed = player.tickCount;
-        return original.call(instance, localPlayer, hand, blockHitResult);
+        InteractionResult toReturn = original.call(instance, localPlayer, hand, blockHitResult);
+        if (toReturn.consumesAction()) lastUsed = player.tickCount;
+        return toReturn;
     }
 }

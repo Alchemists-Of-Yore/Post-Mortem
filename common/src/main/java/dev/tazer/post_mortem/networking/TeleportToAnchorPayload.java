@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 
 public record TeleportToAnchorPayload(AnchorType anchorType) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<TeleportToAnchorPayload> TYPE = new CustomPacketPayload.Type<>(PostMortem.location("teleport_to_anchor"));
-    // TODO: make teleport in centre of block
+
     public static final StreamCodec<RegistryFriendlyByteBuf, TeleportToAnchorPayload> STREAM_CODEC = StreamCodec.composite(
             AnchorType.STREAM_CODEC,
             TeleportToAnchorPayload::anchorType,

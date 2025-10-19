@@ -109,9 +109,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     protected void pm$onSyncedDataUpdated(EntityDataAccessor<?> key, CallbackInfo ci) {
         super.pm$onSyncedDataUpdated(key, ci);
 
-        if (key.equals(SOUL_STATE)) {
-            onSoulStateUpdated(getSoulState());
-        }
+        if (key.equals(SOUL_STATE)) onSoulStateUpdated(getSoulState());
     }
 
     @Unique

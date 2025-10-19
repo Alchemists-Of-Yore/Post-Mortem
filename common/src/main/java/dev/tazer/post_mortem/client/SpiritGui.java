@@ -60,7 +60,7 @@ public class SpiritGui {
 
     private float getHotbarAlpha() {
         long delta = lastSelectionTime - Util.getMillis() + FADE_OUT_DELAY;
-        return Mth.clamp((float) delta / (float) FADE_OUT_TIME, 0.0F, 1.0F);
+        return Mth.clamp((float) delta / (float) FADE_OUT_TIME, 0, 1);
     }
 
     public void renderHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
