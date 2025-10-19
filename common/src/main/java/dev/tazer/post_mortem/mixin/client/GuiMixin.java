@@ -24,7 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Gui.class)
 public class GuiMixin implements GuiExtension {
 
-    // TODO: fix downed hearts
+    // TODO: render completely different set of hearts for manifestation (and downed?)
+
     @Shadow
     @Final
     private Minecraft minecraft;

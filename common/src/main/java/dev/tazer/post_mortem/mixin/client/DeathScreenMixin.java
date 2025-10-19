@@ -18,7 +18,7 @@ import java.util.List;
 @Mixin(DeathScreen.class)
 public abstract class DeathScreenMixin extends ScreenMixin {
     // TODO: background gets gray scale over time
-    // TODO: title is enlarged(?) gets redder over time
+    // TODO: title gets redder over time
 
     @Shadow
     @Nullable

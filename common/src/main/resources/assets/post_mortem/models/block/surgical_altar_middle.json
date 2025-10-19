@@ -1,65 +1,64 @@
 {
-	"format_version": "1.9.0",
-	"credit": "Made by Farcr",
-	"texture_size": [64, 64],
-	"textures": {
-		"0": "post_mortem:block/surgical_altar",
-		"particle": "post_mortem:block/surgical_altar_particle"
-	},
-	"elements": [
-		{
-			"from": [0, 0, 0],
-			"to": [16, 8, 16],
-			"rotation": {"angle": 0, "axis": "y", "origin": [0, 0, -16]},
-			"faces": {
-				"east": {"uv": [4, 2, 8, 4], "texture": "#0"},
-				"west": {"uv": [4, 2, 8, 4], "texture": "#0"},
-				"up": {"uv": [0, 8, 4, 12], "texture": "#0"},
-				"down": {"uv": [4, 8, 8, 12], "texture": "#0"}
-			}
-		},
-		{
-			"from": [2, 8, 0],
-			"to": [14, 13, 4],
-			"rotation": {"angle": 0, "axis": "y", "origin": [2, 8, 2]},
-			"faces": {
-				"east": {"uv": [7, 0.75, 8, 2], "texture": "#0"},
-				"south": {"uv": [12.5, 10.5, 15.5, 11.75], "texture": "#0"},
-				"west": {"uv": [4, 0.75, 5, 2], "texture": "#0"},
-				"up": {"uv": [0.5, 8, 3.5, 9], "texture": "#0"}
-			}
-		},
-		{
-			"from": [2, 8, 12],
-			"to": [14, 13, 16],
-			"rotation": {"angle": 0, "axis": "y", "origin": [2, 8, 28]},
-			"faces": {
-				"north": {"uv": [8.5, 10.5, 11.5, 11.75], "texture": "#0"},
-				"east": {"uv": [4, 0.75, 5, 2], "texture": "#0"},
-				"west": {"uv": [7, 0.75, 8, 2], "texture": "#0"},
-				"up": {"uv": [0.5, 11, 3.5, 12], "texture": "#0"},
-				"down": {"uv": [0, 3.5, 3, 4.5], "texture": "#0"}
-			}
-		},
-		{
-			"from": [2, 8, 4],
-			"to": [4, 10, 12],
-			"rotation": {"angle": 0, "axis": "y", "origin": [2, 8, 4]},
-			"faces": {
-				"east": {"uv": [9, 9.75, 11, 10.25], "texture": "#0"},
-				"west": {"uv": [5, 1.5, 7, 2], "texture": "#0"},
-				"up": {"uv": [0.5, 9, 1, 11], "texture": "#0"}
-			}
-		},
-		{
-			"from": [12, 8, 4],
-			"to": [14, 10, 12],
-			"rotation": {"angle": 0, "axis": "y", "origin": [12, 8, 4]},
-			"faces": {
-				"east": {"uv": [5, 1.5, 7, 2], "texture": "#0"},
-				"west": {"uv": [13, 9.75, 15, 10.25], "texture": "#0"},
-				"up": {"uv": [3, 9, 3.5, 11], "texture": "#0"}
-			}
-		}
-	]
+  "credit": "Made by Farcr",
+  "texture_size": [64, 64],
+  "textures": {
+    "0": "post_mortem:block/surgical_altar",
+    "particle": "post_mortem:block/surgical_altar_particle"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 8, 16],
+      "rotation": {"angle": 0, "axis": "y", "origin": [8, 7.25, 8]},
+      "faces": {
+        "north": {"uv": [4, 2, 8, 4], "texture": "#0"},
+        "south": {"uv": [4, 2, 8, 4], "texture": "#0"},
+        "up": {"uv": [0, 8, 4, 12], "rotation": 270, "texture": "#0"},
+        "down": {"uv": [4, 8, 8, 12], "rotation": 90, "texture": "#0"}
+      }
+    },
+    {
+      "from": [0, 8, 2],
+      "to": [4, 13, 14],
+      "rotation": {"angle": 0, "axis": "y", "origin": [8, 7.25, 8]},
+      "faces": {
+        "north": {"uv": [7, 0.75, 8, 2], "texture": "#0"},
+        "east": {"uv": [12.5, 10.5, 15.5, 11.75], "texture": "#0"},
+        "south": {"uv": [4, 0.75, 5, 2], "texture": "#0"},
+        "up": {"uv": [0.5, 8, 3.5, 9], "rotation": 270, "texture": "#0"}
+      }
+    },
+    {
+      "from": [12, 8, 2],
+      "to": [16, 13, 14],
+      "rotation": {"angle": 0, "axis": "y", "origin": [8, 7.25, 8]},
+      "faces": {
+        "north": {"uv": [4, 0.75, 5, 2], "texture": "#0"},
+        "south": {"uv": [7, 0.75, 8, 2], "texture": "#0"},
+        "west": {"uv": [8.5, 10.5, 11.5, 11.75], "texture": "#0"},
+        "up": {"uv": [0.5, 11, 3.5, 12], "rotation": 270, "texture": "#0"},
+        "down": {"uv": [0, 3.5, 3, 4.5], "rotation": 90, "texture": "#0"}
+      }
+    },
+    {
+      "from": [4, 8, 12],
+      "to": [12, 10, 14],
+      "rotation": {"angle": 0, "axis": "y", "origin": [8, 7.25, 8]},
+      "faces": {
+        "north": {"uv": [9, 9.75, 11, 10.25], "texture": "#0"},
+        "south": {"uv": [5, 1.5, 7, 2], "texture": "#0"},
+        "up": {"uv": [0.5, 9, 1, 11], "rotation": 270, "texture": "#0"}
+      }
+    },
+    {
+      "from": [4, 8, 2],
+      "to": [12, 10, 4],
+      "rotation": {"angle": 0, "axis": "y", "origin": [8, 7.25, 8]},
+      "faces": {
+        "north": {"uv": [5, 1.5, 7, 2], "texture": "#0"},
+        "south": {"uv": [13, 9.75, 15, 10.25], "texture": "#0"},
+        "up": {"uv": [3, 9, 3.5, 11], "rotation": 270, "texture": "#0"}
+      }
+    }
+  ]
 }
