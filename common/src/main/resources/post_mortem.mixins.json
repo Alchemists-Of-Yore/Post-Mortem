@@ -11,6 +11,7 @@
     "ItemEntityMixin",
     "LevelInvoker",
     "LivingEntityMixin",
+    "PlayerListMixin",
     "PlayerMixin",
     "ServerPlayerMixin",
     "SoulFireBlockMixin"

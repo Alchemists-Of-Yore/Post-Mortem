@@ -32,6 +32,8 @@ public record TeleportToAnchorPayload(AnchorType anchorType) implements CustomPa
     }
 
     public void handle(ServerPlayer player) {
+        // TODO: change to only teleport if you're not already in range of it
+
         GlobalPos location = switch (anchorType()) {
             case DEATH_POINT -> player.getLastDeathLocation().orElse(null);
             case GRAVESTONE -> player.getGrave();
@@ -47,6 +49,8 @@ public record TeleportToAnchorPayload(AnchorType anchorType) implements CustomPa
                 Direction direction = player.getDirection();
 
                 BlockState state = level.getBlockState(pos);
+
+                // TODO: display chat message and do not teleport if not valid
 
                 if (anchorType() == AnchorType.GRAVESTONE) {
                     if (state.getBlock() instanceof GravestoneBlock) direction = state.getValue(GravestoneBlock.FACING);

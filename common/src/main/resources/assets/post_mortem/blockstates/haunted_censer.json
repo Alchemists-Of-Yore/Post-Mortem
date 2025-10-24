@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "post_mortem:block/haunted_censer"
+    },
+    "lit=true": {
+      "model": "post_mortem:block/haunted_censer_lit"
+    }
+  }
+}

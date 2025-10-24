@@ -16,6 +16,7 @@ public class PMBlocks {
 
     public static final GravestoneBlock GRAVESTONE = registerBlock("gravestone", new GravestoneBlock(ofFullCopy(Blocks.STONE).noOcclusion()), false);
     public static final SurgicalAltarBlock SURGICAL_ALTAR = registerBlock("surgical_altar", new SurgicalAltarBlock(ofFullCopy(Blocks.STONE).noOcclusion()), false);
+    public static final SurgicalAltarBlock HAUNTED_CENSER = registerBlock("haunted_censer", new SurgicalAltarBlock(ofFullCopy(Blocks.LANTERN)));
 
     public static void register() {}
 }
