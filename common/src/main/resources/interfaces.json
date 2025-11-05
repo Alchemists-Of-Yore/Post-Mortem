@@ -1,7 +1,9 @@
 {
   "net/minecraft/world/entity/player/Player": [
-    "dev/tazer/post_mortem/mixininterface/PlayerExtension",
-    "dev/tazer/post_mortem/mixininterface/Spirit"
+    "dev/tazer/post_mortem/mixininterface/PlayerExtension"
+  ],
+  "net/minecraft/server/level/ServerPlayer": [
+    "dev/tazer/post_mortem/mixininterface/ServerPlayerExtension"
   ],
   "net/minecraft/client/gui/Gui": [
     "dev/tazer/post_mortem/mixininterface/client/GuiExtension"

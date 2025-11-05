@@ -19,6 +19,7 @@ public class LifegemItem extends Item {
             case ALIVE -> SoulState.DOWNED;
             case DOWNED -> SoulState.SPIRIT;
             case SPIRIT -> SoulState.MANIFESTATION;
+            case MANIFESTATION -> SoulState.POSSESSION;
             default -> SoulState.ALIVE;
         };
 

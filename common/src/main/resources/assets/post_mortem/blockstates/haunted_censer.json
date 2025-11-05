@@ -1,9 +1,12 @@
 {
   "variants": {
-    "lit=false": {
+    "link=absent": {
       "model": "post_mortem:block/haunted_censer"
     },
-    "lit=true": {
+    "link=weak": {
+      "model": "post_mortem:block/haunted_censer_lit"
+    },
+    "link=strong": {
       "model": "post_mortem:block/haunted_censer_lit"
     }
   }

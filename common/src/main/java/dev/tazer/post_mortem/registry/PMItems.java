@@ -1,8 +1,6 @@
 package dev.tazer.post_mortem.registry;
 
-import dev.tazer.post_mortem.item.GravestoneBlockItem;
-import dev.tazer.post_mortem.item.LifegemItem;
-import dev.tazer.post_mortem.item.SurgicalAltarBlockItem;
+import dev.tazer.post_mortem.item.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 
@@ -17,9 +15,9 @@ public class PMItems {
 
     public static final GravestoneBlockItem GRAVESTONE = registerItem("gravestone", new GravestoneBlockItem(PMBlocks.GRAVESTONE, new Properties()));
     public static final SurgicalAltarBlockItem SURGICAL_ALTAR = registerItem("surgical_altar", new SurgicalAltarBlockItem(PMBlocks.SURGICAL_ALTAR, new Properties()));
+    public static final AbstractCenserBlockItem HAUNTED_CENSER = registerItem("haunted_censer", new HauntedCenserBlockItem(PMBlocks.HAUNTED_CENSER, new Properties()));
 
     public static final LifegemItem LIFEGEM = registerItem("lifegem", new LifegemItem(new Properties().rarity(Rarity.EPIC)));
-
     public static final Item LIFESALT = registerItem("lifesalt", new Item(new Properties().rarity(Rarity.UNCOMMON)));
 
     public static void register() {}

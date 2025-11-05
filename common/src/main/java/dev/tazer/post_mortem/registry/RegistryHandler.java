@@ -14,7 +14,10 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public class RegistryHandler {
@@ -28,7 +31,7 @@ public class RegistryHandler {
     }
 
     public static <B extends Block> B registerBlock(String name, B block) {
-        return registerBlock(name, block, true);
+        return registerBlock(name, block, false);
     }
 
     public static <B extends Block> B registerBlock(String name, B block, boolean registerItem) {
@@ -42,6 +45,10 @@ public class RegistryHandler {
         B registered = register(name, item, BuiltInRegistries.ITEM);
         PMItems.ITEMS.add(registered);
         return registered;
+    }
+
+    public static <B extends BlockEntity> BlockEntityType<B> registerBlockEntity(String name, Supplier<BlockEntityType.Builder<B>> builder) {
+        return register(name, builder.get().build(null), BuiltInRegistries.BLOCK_ENTITY_TYPE);
     }
 
     public static <B extends CreativeModeTab> B registerTab(String name, B tab) {
@@ -71,6 +78,10 @@ public class RegistryHandler {
 
         if (key.equals(BuiltInRegistries.ITEM.key())) {
             PMItems.register();
+        }
+
+        if (key.equals(BuiltInRegistries.BLOCK_ENTITY_TYPE.key())) {
+            PMBlockEntities.register();
         }
 
         if (key.equals(BuiltInRegistries.CREATIVE_MODE_TAB.key())) {

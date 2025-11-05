@@ -20,7 +20,7 @@ public class SpawnPointMenuItem implements SpiritMenuItem {
 
     @Override
     public void selectItem(SpiritMenu menu) {
-        Services.PLATFORM.sendToServer(new TeleportToAnchorPayload(AnchorType.SPAWN_POINT));
+        Services.PLATFORM.sendToServer(new TeleportToAnchorPayload(AnchorType.SPAWN));
     }
 
     @Override

@@ -1,49 +1,47 @@
 package dev.tazer.post_mortem.block;
 
 import com.mojang.serialization.MapCodec;
-import dev.tazer.post_mortem.blockentity.AbstractCenserBlockEntity;
-import dev.tazer.post_mortem.blockentity.LinkState;
-import dev.tazer.post_mortem.blockentity.SurgicalAltarBlockEntity;
-import dev.tazer.post_mortem.registry.PMBlockEntities;
 import dev.tazer.post_mortem.registry.PMBlocks;
+import dev.tazer.post_mortem.registry.PMItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BedPart;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.Nullable;
 
-public class SurgicalAltarBlock extends AbstractCenserBlock implements EntityBlock {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+public class SurgicalAltarPartBlock extends HorizontalDirectionalBlock {
+    public static final EnumProperty<BedPart> PART = EnumProperty.create("part", BedPart.class);
 
-    public SurgicalAltarBlock(Properties properties) {
+    public SurgicalAltarPartBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(LINK_STATE, LinkState.ABSENT));
+        registerDefaultState(stateDefinition.any().setValue(PART, BedPart.FOOT));
     }
 
     @Override
-    public MapCodec<? extends AbstractCenserBlock> codec() {
-        return simpleCodec(SurgicalAltarBlock::new);
+    public MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return simpleCodec(SurgicalAltarPartBlock::new);
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(LINK_STATE, FACING);
+        builder.add(FACING, PART);
     }
 
     @Override
@@ -53,11 +51,28 @@ public class SurgicalAltarBlock extends AbstractCenserBlock implements EntityBlo
             Direction direction = state.getValue(FACING);
             BlockPos headPos = pos.relative(direction.getCounterClockWise());
             BlockPos footPos = pos.relative(direction.getClockWise());
-            level.setBlock(headPos, PMBlocks.SURGICAL_ALTAR_PART.withPropertiesOf(state).setValue(SurgicalAltarPartBlock.PART, BedPart.HEAD), 3);
-            level.setBlock(footPos, PMBlocks.SURGICAL_ALTAR_PART.withPropertiesOf(state).setValue(SurgicalAltarPartBlock.PART, BedPart.FOOT), 3);
+            level.setBlock(headPos, state.setValue(PART, BedPart.HEAD), 3);
+            level.setBlock(footPos, state.setValue(PART, BedPart.FOOT), 3);
             level.blockUpdated(pos, Blocks.AIR);
             state.updateNeighbourShapes(level, pos, 3);
         }
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        Direction facing = state.getValue(FACING);
+        switch (state.getValue(PART)) {
+            case HEAD -> pos = pos.relative(facing.getClockWise());
+            case FOOT -> pos = pos.relative(facing.getCounterClockWise());
+        }
+
+        state = level.getBlockState(pos);
+
+        if (!state.is(PMBlocks.SURGICAL_ALTAR)) {
+            return InteractionResult.FAIL;
+        }
+
+        return super.useWithoutItem(state, level, pos, player, hitResult);
     }
 
     @Override
@@ -67,10 +82,19 @@ public class SurgicalAltarBlock extends AbstractCenserBlock implements EntityBlo
 
     @Override
     protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos currentPos, BlockPos neighborPos) {
-        if (!neighborState.is(PMBlocks.SURGICAL_ALTAR_PART)) {
+        if (!neighborState.is(PMBlocks.SURGICAL_ALTAR)) {
             Direction facing = state.getValue(FACING);
-            if (direction == facing.getClockWise() || direction == facing.getCounterClockWise()) {
-                return Blocks.AIR.defaultBlockState();
+            switch (state.getValue(PART)) {
+                case HEAD -> {
+                    if (direction == facing.getClockWise()) {
+                        return Blocks.AIR.defaultBlockState();
+                    }
+                }
+                case FOOT -> {
+                    if (direction == facing.getCounterClockWise()) {
+                        return Blocks.AIR.defaultBlockState();
+                    }
+                }
             }
         }
 
@@ -88,27 +112,12 @@ public class SurgicalAltarBlock extends AbstractCenserBlock implements EntityBlo
                 ? defaultBlockState().setValue(FACING, direction) : null;
     }
 
-    @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
-        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
-    }
-
-    @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
-        return state.rotate(mirror.getRotation(state.getValue(FACING)));
-    }
-
     public static boolean isValid(Level level, BlockPlaceContext context, BlockPos pos) {
         return level.getBlockState(pos).canBeReplaced(context) && level.getWorldBorder().isWithinBounds(pos);
     }
 
     @Override
-    public @Nullable AbstractCenserBlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new SurgicalAltarBlockEntity(pos, state);
-    }
-
-    @Override
-    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        return level.isClientSide() ? null : createTickerHelper(blockEntityType, PMBlockEntities.SURGICAL_ALTAR, SurgicalAltarBlockEntity::tick);
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+        return new ItemStack(PMItems.SURGICAL_ALTAR);
     }
 }

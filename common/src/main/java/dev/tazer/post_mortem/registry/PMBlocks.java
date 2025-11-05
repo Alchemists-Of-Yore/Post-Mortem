@@ -1,7 +1,10 @@
 package dev.tazer.post_mortem.registry;
 
 import dev.tazer.post_mortem.block.GravestoneBlock;
+import dev.tazer.post_mortem.block.HauntedCenserBlock;
 import dev.tazer.post_mortem.block.SurgicalAltarBlock;
+import dev.tazer.post_mortem.block.SurgicalAltarPartBlock;
+import dev.tazer.post_mortem.blockentity.LinkState;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -14,9 +17,13 @@ import static net.minecraft.world.level.block.state.BlockBehaviour.Properties.of
 public class PMBlocks {
     public static final List<Block> BLOCKS = new ArrayList<>();
 
-    public static final GravestoneBlock GRAVESTONE = registerBlock("gravestone", new GravestoneBlock(ofFullCopy(Blocks.STONE).noOcclusion()), false);
-    public static final SurgicalAltarBlock SURGICAL_ALTAR = registerBlock("surgical_altar", new SurgicalAltarBlock(ofFullCopy(Blocks.STONE).noOcclusion()), false);
-    public static final SurgicalAltarBlock HAUNTED_CENSER = registerBlock("haunted_censer", new SurgicalAltarBlock(ofFullCopy(Blocks.LANTERN)));
+    public static final GravestoneBlock GRAVESTONE = registerBlock("gravestone", new GravestoneBlock(ofFullCopy(Blocks.STONE).noOcclusion()));
+    public static final SurgicalAltarBlock SURGICAL_ALTAR = registerBlock("surgical_altar", new SurgicalAltarBlock(ofFullCopy(Blocks.STONE).noOcclusion()));
+    public static final SurgicalAltarPartBlock SURGICAL_ALTAR_PART = registerBlock("surgical_altar_part", new SurgicalAltarPartBlock(ofFullCopy(Blocks.STONE).noOcclusion()));
+    public static final HauntedCenserBlock HAUNTED_CENSER = registerBlock("haunted_censer", new HauntedCenserBlock(
+            ofFullCopy(Blocks.LANTERN)
+            .lightLevel(state -> state.getValue(HauntedCenserBlock.LINK_STATE) == LinkState.ABSENT ? 0 : state.getValue(HauntedCenserBlock.LINK_STATE) == LinkState.WEAK ? 4 : 7)
+    ));
 
     public static void register() {}
 }

@@ -1,28 +1,24 @@
 package dev.tazer.post_mortem.mixin;
 
 import dev.tazer.post_mortem.PostMortem;
-import dev.tazer.post_mortem.entity.PlayerUtil;
+import dev.tazer.post_mortem.entity.AnchorType;
 import dev.tazer.post_mortem.entity.SoulState;
 import dev.tazer.post_mortem.entity.SpiritAnchor;
 import dev.tazer.post_mortem.mixininterface.PlayerExtension;
-import dev.tazer.post_mortem.mixininterface.Spirit;
 import dev.tazer.post_mortem.registry.PMDamageTypes;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.block.SoulFireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -33,12 +29,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.UUID;
 
 @Mixin(Player.class)
-public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExtension, Spirit {
+public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExtension {
 
     @Unique
     private final Player pm$player = (Player) (Object) this;
@@ -50,6 +46,8 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     @Unique
     private static final EntityDataAccessor<Optional<GlobalPos>> BLOCK_ANCHOR = SynchedEntityData.defineId(Player.class, EntityDataSerializers.OPTIONAL_GLOBAL_POS);
     @Unique
+    private static final EntityDataAccessor<OptionalInt> ANCHOR_TYPE = SynchedEntityData.defineId(Player.class, EntityDataSerializers.OPTIONAL_UNSIGNED_INT);
+    @Unique
     private static final EntityDataAccessor<Optional<GlobalPos>> GRAVE = SynchedEntityData.defineId(Player.class, EntityDataSerializers.OPTIONAL_GLOBAL_POS);
 
     @Unique
@@ -60,6 +58,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
         builder.define(SOUL_STATE, 0);
         builder.define(ENTITY_ANCHOR, Optional.empty());
         builder.define(BLOCK_ANCHOR, Optional.empty());
+        builder.define(ANCHOR_TYPE, OptionalInt.empty());
         builder.define(GRAVE, Optional.empty());
     }
 
@@ -110,54 +109,15 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
         super.pm$onSyncedDataUpdated(key, ci);
 
         if (key.equals(SOUL_STATE)) onSoulStateUpdated(getSoulState());
+        if (key.equals(ENTITY_ANCHOR) || key.equals(BLOCK_ANCHOR) || key.equals(ANCHOR_TYPE)) onAnchorUpdated(getAnchor());
     }
 
     @Unique
     protected void onSoulStateUpdated(SoulState soulState) {
-        PlayerUtil.resetAttributes(pm$player);
-        AttributeMap attributeMap = pm$player.getAttributes();
-        Map<Holder<Attribute>, Double> newAttributeMap = null;
+    }
 
-        switch (soulState) {
-            case ALIVE -> setAnchor(null);
-            case DOWNED -> {
-                newAttributeMap = Map.of(
-                        Attributes.MAX_HEALTH, -14D,
-                        Attributes.MOVEMENT_SPEED, -0.06,
-                        Attributes.ENTITY_INTERACTION_RANGE, -3D,
-                        Attributes.BLOCK_INTERACTION_RANGE, -4.5D
-                );
-
-                pm$player.setHealth(pm$player.getMaxHealth());
-            }
-            case SPIRIT -> {
-                newAttributeMap = Map.of(
-                        Attributes.ENTITY_INTERACTION_RANGE, -3D
-                );
-
-                GlobalPos pos = getAnchor() == null ? GlobalPos.of(pm$player.level().dimension(), pm$player.blockPosition()) : getAnchor().pos();
-                setAnchor(new SpiritAnchor(null, pos));
-                pm$player.getInventory().dropAll();
-            }
-            case MANIFESTATION -> {
-
-                newAttributeMap = Map.of(
-                        Attributes.MAX_HEALTH, -10D
-                );
-
-                pm$player.setHealth(pm$player.getMaxHealth());
-            }
-        }
-
-        if (newAttributeMap != null) {
-            for (Map.Entry<Holder<Attribute>, Double> entry : newAttributeMap.entrySet()) {
-                AttributeInstance attributeinstance = attributeMap.getInstance(entry.getKey());
-                if (attributeinstance != null) {
-                    attributeinstance.removeModifiers();
-                    attributeinstance.addPermanentModifier(new AttributeModifier(ResourceLocation.parse(entry.getKey().getRegisteredName()), entry.getValue(), AttributeModifier.Operation.ADD_VALUE));
-                }
-            }
-        }
+    @Unique
+    protected void onAnchorUpdated(SpiritAnchor anchor) {
     }
 
     @Override
@@ -173,9 +133,10 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     @Override
     public @Nullable SpiritAnchor getAnchor() {
         SynchedEntityData data = pm$player.getEntityData();
+        OptionalInt type = data.get(ANCHOR_TYPE);
         Optional<GlobalPos> pos = data.get(BLOCK_ANCHOR);
         Optional<UUID> uuid = data.get(ENTITY_ANCHOR);
-        return pos.isPresent() || uuid.isPresent() ? new SpiritAnchor(uuid, pos) : null;
+        return type.isPresent() && (pos.isPresent() || uuid.isPresent()) ? new SpiritAnchor(uuid, pos, AnchorType.byId(type.getAsInt())) : null;
     }
 
     @Override
@@ -183,10 +144,12 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
         SynchedEntityData data = pm$player.getEntityData();
         if (spiritAnchor != null) {
             data.set(ENTITY_ANCHOR, Optional.ofNullable(spiritAnchor.uuid()));
-            data.set(BLOCK_ANCHOR, Optional.ofNullable(spiritAnchor.pos()));
+            data.set(BLOCK_ANCHOR, Optional.ofNullable(spiritAnchor.globalPos()));
+            data.set(ANCHOR_TYPE, OptionalInt.of(spiritAnchor.type().id()));
         } else {
             data.set(ENTITY_ANCHOR, Optional.empty());
             data.set(BLOCK_ANCHOR, Optional.empty());
+            data.set(ANCHOR_TYPE, OptionalInt.empty());
         }
     }
 
@@ -259,6 +222,11 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
             float factor = 0.75F;
             pm$player.setDeltaMovement(vec3.multiply(factor, 1, factor));
         }
+
+        if (state.getBlock() instanceof SoulFireBlock && getSoulState() == SoulState.MANIFESTATION) {
+            // TODO: particle effects?
+            if (pm$player.tickCount % 40 == 0) pm$player.heal(1);
+        }
     }
 
     @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
@@ -270,42 +238,13 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     }
 
     @Override
-    protected boolean fireImmune() {
+    protected boolean isImmuneToFire() {
         return getSoulState() == SoulState.SPIRIT;
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void tick(CallbackInfo ci) {
         if (pm$player.getSoulState() == SoulState.SPIRIT || pm$player.getSoulState() == SoulState.MANIFESTATION) {
-            SpiritAnchor spiritAnchor = pm$player.getAnchor();
-            if (spiritAnchor != null) {
-                Vec3 centre = spiritAnchor.getCentre(pm$player.level());
-                if (centre != null) {
-                    double distance = pm$player.position().distanceTo(centre);
-
-                    Vec3 motion = pm$player.getDeltaMovement();
-
-                    if (pm$player.position().add(motion).distanceTo(centre) > distance) {
-                        double scale;
-                        if (distance <= 15.0) {
-                            scale = 1.0;
-                        } else if (distance >= 25.0) {
-                            scale = 0.0;
-                        } else {
-                            double t = (distance - 15.0) / 10.0;
-
-                            double sharpness = 4.0;
-                            scale = Math.pow(1.0 - t, sharpness);
-
-                            scale = Mth.clamp(scale, 0.0, 1.0);
-                        }
-
-                        if (scale > 0) pm$player.setSprinting(false);
-
-                        pm$player.setDeltaMovement(motion.scale(scale));
-                    }
-                }
-            }
         }
 
         if (!pm$player.isDeadOrDying()) {

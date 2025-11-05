@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "part=head,facing=south": {
+      "model": "post_mortem:block/surgical_altar_head"
+    },
+    "part=foot,facing=south": {
+      "model": "post_mortem:block/surgical_altar_foot"
+    },
+    "part=head,facing=west": {
+      "model": "post_mortem:block/surgical_altar_head",
+      "y": 90
+    },
+    "part=foot,facing=west": {
+      "model": "post_mortem:block/surgical_altar_foot",
+      "y": 90
+    },
+    "part=head,facing=north": {
+      "model": "post_mortem:block/surgical_altar_head",
+      "y": 180
+    },
+    "part=foot,facing=north": {
+      "model": "post_mortem:block/surgical_altar_foot",
+      "y": 180
+    },
+    "part=head,facing=east": {
+      "model": "post_mortem:block/surgical_altar_head",
+      "y": 270
+    },
+    "part=foot,facing=east": {
+      "model": "post_mortem:block/surgical_altar_foot",
+      "y": 270
+    }
+  }
+}

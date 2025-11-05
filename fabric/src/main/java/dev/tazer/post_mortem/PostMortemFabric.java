@@ -2,6 +2,7 @@ package dev.tazer.post_mortem;
 
 import dev.tazer.post_mortem.networking.TeleportToAnchorPayload;
 import dev.tazer.post_mortem.platform.PacketHandler;
+import dev.tazer.post_mortem.registry.PMBlockEntities;
 import dev.tazer.post_mortem.registry.PMBlocks;
 import dev.tazer.post_mortem.registry.PMItems;
 import dev.tazer.post_mortem.registry.PMTabs;
@@ -16,6 +17,7 @@ public class PostMortemFabric implements ModInitializer {
         PostMortem.init();
         PMBlocks.register();
         PMItems.register();
+        PMBlockEntities.register();
         PMTabs.register();
 
         PayloadTypeRegistry.playC2S().register(TeleportToAnchorPayload.TYPE, TeleportToAnchorPayload.STREAM_CODEC);
