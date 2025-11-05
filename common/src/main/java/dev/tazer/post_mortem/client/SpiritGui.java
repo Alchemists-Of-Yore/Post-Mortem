@@ -7,7 +7,6 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -70,9 +69,6 @@ public class SpiritGui {
             if (alpha <= 0) {
                 closeMenu();
             } else {
-                ResourceLocation background = PostMortem.location("textures/gui/hud/haunting_point_slot.png");
-                ResourceLocation selected = PostMortem.location("textures/gui/hud/haunting_point_selector.png");
-
                 float partialTick = deltaTracker.getGameTimeDeltaTicks();
                 float currentIndex = menu.currentIndex;
                 int y = guiGraphics.guiHeight() - 22;
@@ -91,10 +87,10 @@ public class SpiritGui {
                     int x = startX + index * spacing;
                     items.get(index).renderIcon(guiGraphics, x, y);
                     RenderSystem.enableBlend();
-                    guiGraphics.blit(background, x, y, 0, 0, 16, 16, 16, 16);
+                    guiGraphics.blitSprite(PostMortem.location("haunting_point_slot"), x, y, 16, 16);
                 }
 
-                guiGraphics.blit(selected, centreX - 3, y - 3, 0, 0, 22, 22, 22, 22);
+                guiGraphics.blitSprite(PostMortem.location("haunting_point_selector"), centreX - 3, y - 3,  22, 22);
                 RenderSystem.disableBlend();
             }
         }
