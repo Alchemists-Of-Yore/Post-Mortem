@@ -5,7 +5,6 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_18",
   "mixins": [
-    "BaseFireBlockMixin",
     "EntityMixin",
     "FoodDataMixin",
     "ItemEntityMixin",
@@ -13,8 +12,7 @@
     "LivingEntityMixin",
     "PlayerListMixin",
     "PlayerMixin",
-    "ServerPlayerMixin",
-    "SoulFireBlockMixin"
+    "ServerPlayerMixin"
   ],
   "client": [
     "client.DeathScreenMixin",

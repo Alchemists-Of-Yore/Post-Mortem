@@ -13,14 +13,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class EntityMixin {
     @Inject(method = "fireImmune", at = @At("RETURN"), cancellable = true)
     private void pm$fireImmune(CallbackInfoReturnable<Boolean> cir) {
-        if (!cir.getReturnValue()) cir.setReturnValue(fireImmune());
+        if (!cir.getReturnValue()) cir.setReturnValue(isImmuneToFire());
     }
 
     @Inject(method = "onInsideBlock", at = @At("TAIL"))
     protected void pm$onInsideBlock(BlockState state, CallbackInfo ci) {}
 
     @Unique
-    protected boolean fireImmune() {
+    protected boolean isImmuneToFire() {
         return false;
     }
 }

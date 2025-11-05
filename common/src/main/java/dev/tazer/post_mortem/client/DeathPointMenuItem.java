@@ -20,7 +20,7 @@ public class DeathPointMenuItem implements SpiritMenuItem {
 
     @Override
     public void selectItem(SpiritMenu menu) {
-        Services.PLATFORM.sendToServer(new TeleportToAnchorPayload(AnchorType.DEATH_POINT));
+        Services.PLATFORM.sendToServer(new TeleportToAnchorPayload(AnchorType.DEATH));
     }
 
     @Override
