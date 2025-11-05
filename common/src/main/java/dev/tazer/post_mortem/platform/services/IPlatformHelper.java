@@ -28,15 +28,21 @@ public interface IPlatformHelper {
     boolean isDevelopmentEnvironment();
 
     /**
-     * Gets the name of the environment type as a string.
-     *
-     * @return The name of the environment type.
+     * Checks if the mod is being run on a client or a server
+     * @return True if in a client, false otherwise.
      */
-    default String getEnvironmentName() {
-        return isDevelopmentEnvironment() ? "development" : "production";
-    }
+    boolean isClient();
 
+    /**
+     * Sends a packet from the client to the server
+     * @param payload The packet to send
+     */
     void sendToServer(CustomPacketPayload payload);
 
+    /**
+     * Sends a packet from the server to a server player's client
+     * @param player The player to send the packet to
+     * @param payload The packet to send
+     */
     void sendToClient(ServerPlayer player, CustomPacketPayload payload);
 }

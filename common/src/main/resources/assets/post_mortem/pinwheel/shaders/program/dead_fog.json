@@ -1,0 +1,4 @@
+{
+  "vertex": "veil:blit_screen",
+  "fragment": "post_mortem:dead_fog"
+}

@@ -3,6 +3,7 @@ package dev.tazer.post_mortem.platform;
 import dev.tazer.post_mortem.platform.services.IPlatformHelper;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -22,6 +23,11 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     @Override
     public boolean isDevelopmentEnvironment() {
         return !FMLLoader.isProduction();
+    }
+
+    @Override
+    public boolean isClient() {
+        return FMLLoader.getDist() == Dist.CLIENT;
     }
 
     @Override

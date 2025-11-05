@@ -1,0 +1,9 @@
+{
+  "stages": [
+    {
+      "type": "veil:blit",
+      "shader": "post_mortem:dead_fog",
+      "in": "minecraft:main"
+    }
+  ]
+}

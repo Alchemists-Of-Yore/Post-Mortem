@@ -49,3 +49,16 @@ neoForge {
 sourceSets.main.resources {
     srcDir project(':common').file('src/generated/resources')
 }
+
+repositories {
+    maven {
+        url = 'https://maven.blamejared.com'
+    }
+}
+
+dependencies {
+    implementation("foundry.veil:veil-neoforge-$minecraft_version:$veil_version") {
+        exclude group: "maven.modrinth"
+        exclude group: "me.fallenbreath"
+    }
+}

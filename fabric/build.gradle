@@ -46,3 +46,16 @@ fabricApi {
         client = true
     }
 }
+
+repositories {
+    maven {
+        url = 'https://maven.blamejared.com'
+    }
+}
+
+dependencies {
+    implementation("foundry.veil:veil-fabric-$minecraft_version:$veil_version") {
+        exclude group: "maven.modrinth"
+        exclude group: "me.fallenbreath"
+    }
+}

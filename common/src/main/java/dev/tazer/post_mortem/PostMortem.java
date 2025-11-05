@@ -1,5 +1,6 @@
 package dev.tazer.post_mortem;
 
+import dev.tazer.post_mortem.platform.Services;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
@@ -11,6 +12,9 @@ public class PostMortem {
     public static final Logger LOGGER = LoggerFactory.getLogger("Post Mortem");
 
     public static void init() {
+        if (Services.PLATFORM.isClient()) {
+            PostMortemClient.init();
+        }
     }
 
     public static ResourceLocation location(String path) {
