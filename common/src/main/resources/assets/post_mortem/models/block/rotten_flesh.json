@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "post_mortem:block/rotten_flesh"
+  }
+}

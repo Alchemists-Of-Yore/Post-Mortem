@@ -1,10 +1,6 @@
 package dev.tazer.post_mortem.registry;
 
-import dev.tazer.post_mortem.block.GravestoneBlock;
-import dev.tazer.post_mortem.block.HauntedCenserBlock;
-import dev.tazer.post_mortem.block.SurgicalAltarBlock;
-import dev.tazer.post_mortem.block.SurgicalAltarPartBlock;
-import dev.tazer.post_mortem.blockentity.LinkState;
+import dev.tazer.post_mortem.block.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -24,6 +20,10 @@ public class PMBlocks {
             ofFullCopy(Blocks.LANTERN)
             .lightLevel(state -> state.getValue(HauntedCenserBlock.LINK_STATE) == CenserLinkState.ABSENT ? 0 : state.getValue(HauntedCenserBlock.LINK_STATE) == CenserLinkState.WEAK ? 4 : 7)
     ));
+
+    public static final Block LIFEBUD = registerBlock("lifebud", new Block(ofFullCopy(Blocks.HEAVY_CORE)));
+    public static final Block FLESH = registerBlock("flesh", new Block(ofFullCopy(Blocks.SCULK)));
+    public static final Block BUDDING_FLESH = registerBlock("budding_flesh", new Block(ofFullCopy(FLESH)));
 
     public static void register() {}
 }

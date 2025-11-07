@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "quality=rotten": {
+      "model": "post_mortem:block/rotten_flesh"
+    },
+    "quality=normal": {
+      "model": "post_mortem:block/flesh"
+    },
+    "quality=fresh": {
+      "model": "post_mortem:block/fresh_flesh"
+    }
+  }
+}

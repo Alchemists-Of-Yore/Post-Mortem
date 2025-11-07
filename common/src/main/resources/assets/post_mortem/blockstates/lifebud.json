@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "rooted=false": {
+      "model": "post_mortem:block/lifebud"
+    },
+    "rooted=true": {
+      "model": "post_mortem:block/lifebud_rooted"
+    }
+  }
+}
