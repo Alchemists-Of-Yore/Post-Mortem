@@ -12,8 +12,4 @@ public interface ServerPlayerExtension {
     default void validateAnchor() {
         throw new AssertionError("Implemented in Mixin");
     }
-
-    default void removeAnchor() {
-        throw new AssertionError("Implemented in Mixin");
-    }
 }

@@ -2,8 +2,8 @@ package dev.tazer.post_mortem.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.tazer.post_mortem.block.AbstractCenserBlock;
+import dev.tazer.post_mortem.block.CenserLinkState;
 import dev.tazer.post_mortem.blockentity.AbstractCenserBlockEntity;
-import dev.tazer.post_mortem.blockentity.LinkState;
 import dev.tazer.post_mortem.entity.AnchorType;
 import dev.tazer.post_mortem.entity.SoulState;
 import dev.tazer.post_mortem.entity.SpiritAnchor;
@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,7 +24,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.annotation.Nullable;
 import java.util.UUID;
 
 @Mixin(PlayerList.class)
@@ -51,7 +51,7 @@ public abstract class PlayerListMixin {
             if (pos != null) {
                 ServerLevel level = player.server.getLevel(pos.dimension());
                 if (level != null && level.getBlockEntity(pos.pos()) instanceof AbstractCenserBlockEntity censer && censer.spirit == player.getUUID()) {
-                    player.level().setBlockAndUpdate(pos.pos(), censer.getBlockState().setValue(AbstractCenserBlock.LINK_STATE, LinkState.WEAK));
+                    player.level().setBlockAndUpdate(pos.pos(), censer.getBlockState().setValue(AbstractCenserBlock.LINK_STATE, CenserLinkState.WEAK));
                 }
             }
         }
@@ -70,7 +70,7 @@ public abstract class PlayerListMixin {
                 ServerLevel level = player.server.getLevel(pos.dimension());
                 if (anchor.type() == AnchorType.CENSER && level != null && level.getBlockEntity(pos.pos()) instanceof AbstractCenserBlockEntity censer) {
                     if (censer.spirit == player.getUUID()) {
-                        player.level().setBlockAndUpdate(pos.pos(), censer.getBlockState().setValue(AbstractCenserBlock.LINK_STATE, LinkState.STRONG));
+                        player.level().setBlockAndUpdate(pos.pos(), censer.getBlockState().setValue(AbstractCenserBlock.LINK_STATE, CenserLinkState.STRONG));
                     }
                 }
             } else if (anchor.type() == AnchorType.PLAYER) {
@@ -84,7 +84,7 @@ public abstract class PlayerListMixin {
             }
 
             player.validateAnchor();
-            if (!linked) player.removeAnchor();
+            if (!linked) player.setAnchor(null);
         }
     }
 }

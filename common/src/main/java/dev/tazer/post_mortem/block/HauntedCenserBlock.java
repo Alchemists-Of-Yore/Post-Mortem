@@ -3,7 +3,6 @@ package dev.tazer.post_mortem.block;
 import com.mojang.serialization.MapCodec;
 import dev.tazer.post_mortem.blockentity.AbstractCenserBlockEntity;
 import dev.tazer.post_mortem.blockentity.HauntedCenserBlockEntity;
-import dev.tazer.post_mortem.blockentity.LinkState;
 import dev.tazer.post_mortem.registry.PMBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -24,7 +23,7 @@ public class HauntedCenserBlock extends AbstractCenserBlock implements SimpleWat
 
     public HauntedCenserBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(LINK_STATE, LinkState.ABSENT).setValue(WATERLOGGED, false));
+        registerDefaultState(stateDefinition.any().setValue(LINK_STATE, CenserLinkState.ABSENT).setValue(WATERLOGGED, false));
     }
 
     @Override

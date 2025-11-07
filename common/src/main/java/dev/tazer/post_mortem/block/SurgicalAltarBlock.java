@@ -2,7 +2,6 @@ package dev.tazer.post_mortem.block;
 
 import com.mojang.serialization.MapCodec;
 import dev.tazer.post_mortem.blockentity.AbstractCenserBlockEntity;
-import dev.tazer.post_mortem.blockentity.LinkState;
 import dev.tazer.post_mortem.blockentity.SurgicalAltarBlockEntity;
 import dev.tazer.post_mortem.registry.PMBlockEntities;
 import dev.tazer.post_mortem.registry.PMBlocks;
@@ -33,7 +32,7 @@ public class SurgicalAltarBlock extends AbstractCenserBlock implements EntityBlo
 
     public SurgicalAltarBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(LINK_STATE, LinkState.ABSENT));
+        registerDefaultState(stateDefinition.any().setValue(LINK_STATE, CenserLinkState.ABSENT));
     }
 
     @Override

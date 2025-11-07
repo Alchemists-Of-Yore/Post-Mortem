@@ -1,6 +1,7 @@
 package dev.tazer.post_mortem.mixin;
 
 import dev.tazer.post_mortem.block.GravestoneBlock;
+import dev.tazer.post_mortem.blockentity.AbstractCenserBlockEntity;
 import dev.tazer.post_mortem.entity.AnchorType;
 import dev.tazer.post_mortem.entity.SoulState;
 import dev.tazer.post_mortem.entity.SpiritAnchor;
@@ -49,7 +50,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
     protected void onSoulStateUpdated(SoulState soulState) {
         super.onSoulStateUpdated(soulState);
 
-
         AttributeMap attributeMap = pm$player.getAttributes();
         List<Holder<Attribute>> attributes = List.of(
                 Attributes.MAX_HEALTH,
@@ -70,7 +70,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
         switch (soulState) {
             case ALIVE -> setAnchor(null);
             case DOWNED -> {
-                // Copied from ServerPlayer::die
+                // Copied from ServerPlayer#die
                 // Sends death message to players
                 if (pm$player.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)) {
                     Component component = pm$player.getCombatTracker().getDeathMessage();
@@ -131,6 +131,23 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
     protected void onAnchorUpdated(SpiritAnchor anchor) {
         super.onAnchorUpdated(anchor);
 
+        if (anchor == null) {
+            if (getSoulState() == SoulState.MANIFESTATION) {
+                setSoulState(SoulState.SPIRIT);
+            }
+        } else {
+            GlobalPos centre = anchor.getPos(pm$player.level());
+
+            if (centre != null) {
+                Level level = pm$player.server.getLevel(centre.dimension());
+                if (level != null) {
+                    if (level.getBlockEntity(centre.pos()) instanceof AbstractCenserBlockEntity censer) {
+                        censer.addLink(pm$player);
+                    }
+                }
+            }
+        }
+
         validateAnchor();
     }
 
@@ -156,7 +173,27 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
     @Override
     public void setAnchor(@Nullable SpiritAnchor spiritAnchor) {
         SpiritAnchor previous = getAnchor();
-        if (previous != null && previous.type() != AnchorType.CENSER && previous.type() != AnchorType.PLAYER) lastAnchor = previous.type();
+
+        if (previous != null) {
+            if (previous.type() != AnchorType.CENSER && previous.type() != AnchorType.PLAYER) lastAnchor = previous.type();
+            GlobalPos centre = previous.getPos(pm$player.level());
+
+            if (centre != null) {
+                Level level = pm$player.server.getLevel(centre.dimension());
+                if (level != null) {
+                    if (level.getBlockEntity(centre.pos()) instanceof AbstractCenserBlockEntity censer) {
+                        censer.removeLink();
+                    }
+                }
+            }
+        }
+
+        if (getSoulState() == SoulState.SPIRIT) {
+            spiritAnchor = findValidAnchor(AnchorType.PLAYER);
+            if (spiritAnchor == null && lastAnchor != null) spiritAnchor = findValidAnchor(lastAnchor);
+            if (spiritAnchor == null) spiritAnchor = findValidAnchor(AnchorType.DEATH);
+            if (spiritAnchor == null) spiritAnchor = new SpiritAnchor(null, GlobalPos.of(Level.OVERWORLD, pm$player.server.getWorldData().overworldData().getSpawnPos()), AnchorType.SPAWN);
+        }
 
         super.setAnchor(spiritAnchor);
     }
@@ -228,22 +265,5 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
                 }
             }
         }
-    }
-
-    @Override
-    public void removeAnchor() {
-        SpiritAnchor anchor = null;
-
-        if (getSoulState() == SoulState.MANIFESTATION) {
-            setSoulState(SoulState.SPIRIT);
-        }
-
-        if (getSoulState() == SoulState.SPIRIT) {
-            anchor = findValidAnchor(AnchorType.PLAYER);
-            if (anchor == null) anchor = findValidAnchor(lastAnchor);
-            if (anchor == null) anchor = new SpiritAnchor(null, GlobalPos.of(Level.OVERWORLD, pm$player.server.getWorldData().overworldData().getSpawnPos()), AnchorType.SPAWN);
-        }
-
-        setAnchor(anchor);
     }
 }

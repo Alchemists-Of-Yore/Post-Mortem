@@ -2,8 +2,8 @@ package dev.tazer.post_mortem.block;
 
 import com.mojang.serialization.MapCodec;
 import dev.tazer.post_mortem.blockentity.AbstractCenserBlockEntity;
-import dev.tazer.post_mortem.blockentity.LinkState;
 import dev.tazer.post_mortem.entity.AnchorType;
+import dev.tazer.post_mortem.entity.SoulState;
 import dev.tazer.post_mortem.entity.SpiritAnchor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -15,11 +15,12 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractCenserBlock extends BaseEntityBlock {
-    public static final EnumProperty<LinkState> LINK_STATE = EnumProperty.create("link", LinkState.class);
+    public static final EnumProperty<CenserLinkState> LINK_STATE = EnumProperty.create("link", CenserLinkState.class);
 
     public AbstractCenserBlock(Properties properties) {
         super(properties);
@@ -32,7 +33,7 @@ public abstract class AbstractCenserBlock extends BaseEntityBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         SpiritAnchor anchor = player.getAnchor();
 
-        if (level.getBlockEntity(pos) instanceof AbstractCenserBlockEntity censer) {
+        if ((player.getSoulState() == SoulState.SPIRIT || player.getSoulState() == SoulState.MANIFESTATION) && level.getBlockEntity(pos) instanceof AbstractCenserBlockEntity censer) {
             if (censer.spirit == null) {
                 if (anchor != null) {
                     GlobalPos globalPos = anchor.getPos(level);
@@ -40,12 +41,8 @@ public abstract class AbstractCenserBlock extends BaseEntityBlock {
                 }
 
                 player.setAnchor(new SpiritAnchor(null, GlobalPos.of(level.dimension(), pos), AnchorType.CENSER));
-                censer.spirit = player.getUUID();
-                level.setBlockAndUpdate(pos, state.setValue(LINK_STATE, LinkState.STRONG));
             } else if (censer.spirit == player.getUUID()) {
-                if (player instanceof ServerPlayer serverPlayer) serverPlayer.removeAnchor();
-                censer.spirit = null;
-                level.setBlockAndUpdate(pos, state.setValue(LINK_STATE, LinkState.ABSENT));
+                player.setAnchor(null);
             }
         }
 
@@ -54,13 +51,18 @@ public abstract class AbstractCenserBlock extends BaseEntityBlock {
 
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (level.getBlockEntity(pos) instanceof AbstractCenserBlockEntity censer && censer.spirit != null) {
+        if (!newState.is(this) && level.getBlockEntity(pos) instanceof AbstractCenserBlockEntity censer && censer.spirit != null) {
             if (level.getPlayerByUUID(censer.spirit) instanceof ServerPlayer player) {
-                player.removeAnchor();
+                player.setAnchor(null);
             }
         }
 
         super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
     }
 
     @Override

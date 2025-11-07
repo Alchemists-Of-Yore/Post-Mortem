@@ -19,10 +19,10 @@ public class PMBlocks {
 
     public static final GravestoneBlock GRAVESTONE = registerBlock("gravestone", new GravestoneBlock(ofFullCopy(Blocks.STONE).noOcclusion()));
     public static final SurgicalAltarBlock SURGICAL_ALTAR = registerBlock("surgical_altar", new SurgicalAltarBlock(ofFullCopy(Blocks.STONE).noOcclusion()));
-    public static final SurgicalAltarPartBlock SURGICAL_ALTAR_PART = registerBlock("surgical_altar_part", new SurgicalAltarPartBlock(ofFullCopy(Blocks.STONE).noOcclusion()));
+    public static final SurgicalAltarPartBlock SURGICAL_ALTAR_PART = registerBlock("surgical_altar_part", new SurgicalAltarPartBlock(ofFullCopy(SURGICAL_ALTAR).noOcclusion()));
     public static final HauntedCenserBlock HAUNTED_CENSER = registerBlock("haunted_censer", new HauntedCenserBlock(
             ofFullCopy(Blocks.LANTERN)
-            .lightLevel(state -> state.getValue(HauntedCenserBlock.LINK_STATE) == LinkState.ABSENT ? 0 : state.getValue(HauntedCenserBlock.LINK_STATE) == LinkState.WEAK ? 4 : 7)
+            .lightLevel(state -> state.getValue(HauntedCenserBlock.LINK_STATE) == CenserLinkState.ABSENT ? 0 : state.getValue(HauntedCenserBlock.LINK_STATE) == CenserLinkState.WEAK ? 4 : 7)
     ));
 
     public static void register() {}
