@@ -5,7 +5,7 @@ import dev.tazer.post_mortem.entity.AnchorType;
 import dev.tazer.post_mortem.entity.SoulState;
 import dev.tazer.post_mortem.entity.SpiritAnchor;
 import dev.tazer.post_mortem.mixininterface.PlayerExtension;
-import dev.tazer.post_mortem.registry.PMDamageTypes;
+import dev.tazer.post_mortem.registry.keys.PMDamageTypes;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;

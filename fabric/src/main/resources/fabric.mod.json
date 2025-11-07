@@ -41,6 +41,9 @@
       ],
       "net/minecraft/server/level/ServerPlayer": [
         "dev/tazer/post_mortem/mixininterface/ServerPlayerExtension"
+      ],
+      "net/minecraft/client/gui/Gui": [
+        "dev/tazer/post_mortem/mixininterface/client/GuiExtension"
       ]
     }
   }

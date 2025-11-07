@@ -1,4 +1,4 @@
-package dev.tazer.post_mortem.registry;
+package dev.tazer.post_mortem.registry.keys;
 
 import dev.tazer.post_mortem.PostMortem;
 import net.minecraft.core.registries.Registries;

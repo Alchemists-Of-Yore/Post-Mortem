@@ -1,26 +1,31 @@
 package dev.tazer.post_mortem;
 
-import dev.tazer.post_mortem.networking.TeleportToAnchorPayload;
-import dev.tazer.post_mortem.platform.PacketHandler;
-import dev.tazer.post_mortem.registry.PMBlockEntities;
-import dev.tazer.post_mortem.registry.PMBlocks;
-import dev.tazer.post_mortem.registry.PMItems;
-import dev.tazer.post_mortem.registry.PMTabs;
+import dev.tazer.post_mortem.registry.RegistryHandler;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class PostMortemFabric implements ModInitializer {
     
     @Override
     public void onInitialize() {
-        PostMortem.init();
-        PMBlocks.register();
-        PMItems.register();
-        PMBlockEntities.register();
-        PMTabs.register();
+        register();
+    }
 
-        PayloadTypeRegistry.playC2S().register(TeleportToAnchorPayload.TYPE, TeleportToAnchorPayload.STREAM_CODEC);
-        ServerPlayNetworking.registerGlobalReceiver(TeleportToAnchorPayload.TYPE, PacketHandler::handleAnchorTeleport);
+    public static void register() {
+        Set<ResourceLocation> ordered = new LinkedHashSet<>();
+        ordered.addAll(Collections.unmodifiableSet(BuiltInRegistries.LOADERS.keySet()));
+        ordered.addAll(BuiltInRegistries.REGISTRY.keySet().stream().sorted(ResourceLocation::compareTo).toList());
+
+        for (ResourceLocation rootRegistryName : ordered) {
+            ResourceKey<? extends Registry<?>> registryKey = ResourceKey.createRegistryKey(rootRegistryName);
+            RegistryHandler.register(registryKey);
+        }
     }
 }

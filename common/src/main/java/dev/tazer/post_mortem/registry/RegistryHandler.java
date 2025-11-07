@@ -2,6 +2,7 @@ package dev.tazer.post_mortem.registry;
 
 
 import dev.tazer.post_mortem.PostMortem;
+import dev.tazer.post_mortem.registry.worldgen.PMFeatures;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
@@ -16,6 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.levelgen.feature.Feature;
 
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -71,6 +73,10 @@ public class RegistryHandler {
         return Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, PostMortem.location(name), effect);
     }
 
+    public static <B extends Feature<?>> B registerFeature(String name, B feature) {
+        return register(name, feature, BuiltInRegistries.FEATURE);
+    }
+
     public static void register(ResourceKey<? extends Registry<?>> key) {
         if (key.equals(BuiltInRegistries.BLOCK.key())) {
             PMBlocks.register();
@@ -86,6 +92,10 @@ public class RegistryHandler {
 
         if (key.equals(BuiltInRegistries.CREATIVE_MODE_TAB.key())) {
             PMTabs.register();
+        }
+
+        if (key.equals(BuiltInRegistries.FEATURE.key())) {
+            PMFeatures.register();
         }
     }
 }
