@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Minecraft.class)
-public class MinecraftMixin {
+public abstract class MinecraftMixin {
     @Shadow
     @Final
     public Gui gui;
@@ -44,28 +44,22 @@ public class MinecraftMixin {
         return original.call(instance);
     }
 
+    // TODO: copy this serverside and disable inv/armor
     @WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z", ordinal = 4))
     private boolean selectSpiritSlot(KeyMapping instance, Operation<Boolean> original) {
-        boolean toReturn = original.call(instance);
-
-        if (player.getSoulState() == SoulState.ALIVE) {
-            return toReturn;
-        }
-
-        return false;
+        return player.getSoulState().hasInventory() ? original.call(instance) : false;
     }
 
+    // TODO: copy this serverside
     @Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)
     private void cancelAttack(CallbackInfoReturnable<Boolean> cir) {
-        if (player.getSoulState() == SoulState.SPIRIT || player.getSoulState() == SoulState.DOWNED) {
-            cir.setReturnValue(false);
-            cir.cancel();
-        }
+        if (!player.getSoulState().canAttack()) cir.setReturnValue(false);
     }
 
+    // TODO: move (or copy) this serverside
     @WrapOperation(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;useItemOn(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult cancelMaybe(MultiPlayerGameMode instance, LocalPlayer localPlayer, InteractionHand hand, BlockHitResult blockHitResult, Operation<InteractionResult> original) {
-        if (player.getSoulState() == SoulState.SPIRIT && player.tickCount - lastUsed <= 40) {
+        if (!player.getSoulState().canInteract() || (player.getSoulState() == SoulState.SPIRIT && player.tickCount - lastUsed <= 40)) {
             return InteractionResult.FAIL;
         }
 

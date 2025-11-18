@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MultiPlayerGameMode.class)
-public class MultiPlayerGameModeMixin {
+public abstract class MultiPlayerGameModeMixin {
     @Shadow
     @Final
     private Minecraft minecraft;

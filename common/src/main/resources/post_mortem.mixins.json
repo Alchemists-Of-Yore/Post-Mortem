@@ -7,11 +7,12 @@
   "mixins": [
     "EntityMixin",
     "FoodDataMixin",
+    "InventoryMixin",
     "ItemEntityMixin",
-    "LevelInvoker",
     "LivingEntityMixin",
     "PlayerListMixin",
     "PlayerMixin",
+    "ServerPlayerGameModeMixin",
     "ServerPlayerMixin"
   ],
   "client": [

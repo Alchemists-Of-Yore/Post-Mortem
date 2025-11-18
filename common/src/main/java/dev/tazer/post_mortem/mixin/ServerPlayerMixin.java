@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
@@ -41,8 +42,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
     @Unique
     private final ServerPlayer pm$player = (ServerPlayer) (Object) this;
 
-    @Unique
-    private Player spirit;
     @Unique
     private AnchorType lastAnchor;
 
@@ -188,11 +187,13 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
             }
         }
 
-        if (getSoulState() == SoulState.SPIRIT) {
-            spiritAnchor = findValidAnchor(AnchorType.PLAYER);
-            if (spiritAnchor == null && lastAnchor != null) spiritAnchor = findValidAnchor(lastAnchor);
-            if (spiritAnchor == null) spiritAnchor = findValidAnchor(AnchorType.DEATH);
-            if (spiritAnchor == null) spiritAnchor = new SpiritAnchor(null, GlobalPos.of(Level.OVERWORLD, pm$player.server.getWorldData().overworldData().getSpawnPos()), AnchorType.SPAWN);
+        if (spiritAnchor == null) {
+            if (getSoulState() == SoulState.SPIRIT) {
+                spiritAnchor = findValidAnchor(AnchorType.PLAYER);
+                if (spiritAnchor == null && lastAnchor != null) spiritAnchor = findValidAnchor(lastAnchor);
+                if (spiritAnchor == null) spiritAnchor = findValidAnchor(AnchorType.DEATH);
+                if (spiritAnchor == null) spiritAnchor = new SpiritAnchor(null, GlobalPos.of(Level.OVERWORLD, pm$player.server.getWorldData().overworldData().getSpawnPos()), AnchorType.SPAWN);
+            }
         }
 
         super.setAnchor(spiritAnchor);
@@ -265,5 +266,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
                 }
             }
         }
+    }
+
+    @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
+    private void attack(Entity targetEntity, CallbackInfo ci) {
+        if (!getSoulState().canAttack()) ci.cancel();
     }
 }

@@ -6,6 +6,7 @@ import net.minecraft.world.level.entity.LevelEntityGetter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
+// TODO: decide on anchor uuids
 @Mixin(Level.class)
 public interface LevelInvoker {
     @Invoker("getEntities")

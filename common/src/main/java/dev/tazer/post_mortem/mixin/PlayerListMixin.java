@@ -45,12 +45,12 @@ public abstract class PlayerListMixin {
     private void onPlayerRemoved(ServerPlayer player, CallbackInfo ci) {
         SpiritAnchor anchor = player.getAnchor();
 
-        if (anchor != null) {
-            GlobalPos pos = anchor.globalPos();
+        if (anchor != null && anchor.uuid().isEmpty()) {
+            GlobalPos pos = anchor.getPos(player.level());
 
             if (pos != null) {
                 ServerLevel level = player.server.getLevel(pos.dimension());
-                if (level != null && level.getBlockEntity(pos.pos()) instanceof AbstractCenserBlockEntity censer && censer.spirit == player.getUUID()) {
+                if (level != null && level.getBlockEntity(pos.pos()) instanceof AbstractCenserBlockEntity censer && censer.spirit.orElse(null) == player.getUUID()) {
                     player.level().setBlockAndUpdate(pos.pos(), censer.getBlockState().setValue(AbstractCenserBlock.LINK_STATE, CenserLinkState.WEAK));
                 }
             }
@@ -63,13 +63,13 @@ public abstract class PlayerListMixin {
 
         if (anchor != null) {
             boolean linked = false;
-            UUID uuid = anchor.uuid();
+            UUID uuid = anchor.uuid().orElse(null);
 
             if (uuid == null) {
-                GlobalPos pos = anchor.globalPos();
+                GlobalPos pos = anchor.globalPos().orElseThrow();
                 ServerLevel level = player.server.getLevel(pos.dimension());
                 if (anchor.type() == AnchorType.CENSER && level != null && level.getBlockEntity(pos.pos()) instanceof AbstractCenserBlockEntity censer) {
-                    if (censer.spirit == player.getUUID()) {
+                    if (censer.spirit.orElse(null) == player.getUUID()) {
                         player.level().setBlockAndUpdate(pos.pos(), censer.getBlockState().setValue(AbstractCenserBlock.LINK_STATE, CenserLinkState.STRONG));
                     }
                 }

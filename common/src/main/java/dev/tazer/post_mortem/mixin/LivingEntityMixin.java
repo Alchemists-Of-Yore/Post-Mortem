@@ -25,7 +25,7 @@ public abstract class LivingEntityMixin extends EntityMixin {
     }
 
     @ModifyVariable(method = "checkTotemDeathProtection", at = @At(value = "STORE", ordinal = 0), ordinal = 0)
-    protected ItemStack pm$findTotem(ItemStack original) {
+    private ItemStack pm$findTotem(ItemStack original) {
         if (original != null) return original;
 
         ItemStack totem = findTotem();
@@ -38,6 +38,11 @@ public abstract class LivingEntityMixin extends EntityMixin {
     @Inject(method = "onSyncedDataUpdated", at = @At("TAIL"))
     protected void pm$onSyncedDataUpdated(EntityDataAccessor<?> key, CallbackInfo ci) {}
 
+    @Inject(method = "canUsePortal", at = @At("RETURN"), cancellable = true)
+    private void canUsePortal(boolean allowPassengers, CallbackInfoReturnable<Boolean> cir) {
+        if (cir.getReturnValue()) cir.setReturnValue(canChangeLevel());
+    }
+
     @Unique
     protected ItemStack findTotem() {
         return ItemStack.EMPTY;
@@ -48,4 +53,10 @@ public abstract class LivingEntityMixin extends EntityMixin {
         return false;
     }
 
+    @Unique
+    protected boolean canChangeLevel() {
+        return true;
+    }
+
+    // TODO: take bound spirit with you when traveling levels
 }

@@ -8,18 +8,26 @@ import net.minecraft.util.ByIdMap;
 import java.util.function.IntFunction;
 
 public enum SoulState {
-    ALIVE(0),
-    DOWNED(1),
-    SPIRIT(2),
-    MANIFESTATION(3),
-    POSSESSION(4);
+    ALIVE(0, true, true, true, true),
+    DOWNED(1, false, false, true, true),
+    SPIRIT(2, true, false, false, false),
+    MANIFESTATION(3, true, true, true, false),
+    POSSESSION(4, false, false, false, false);
 
     private static final IntFunction<SoulState> BY_ID = ByIdMap.continuous(SoulState::id, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
     public static final StreamCodec<ByteBuf, SoulState> STREAM_CODEC = ByteBufCodecs.idMapper(SoulState::byId, SoulState::id);
     private final int id;
+    private final boolean canInteract;
+    private final boolean canAttack;
+    private final boolean canUse;
+    private final boolean hasInventory;
 
-    SoulState(int id) {
+    SoulState(int id, boolean canInteract, boolean canAttack, boolean canUse, boolean hasInventory) {
         this.id = id;
+        this.canInteract = canInteract;
+        this.canAttack = canAttack;
+        this.canUse = canUse;
+        this.hasInventory = hasInventory;
     }
 
     public static SoulState byId(int id) {
@@ -28,5 +36,21 @@ public enum SoulState {
 
     public int id() {
         return this.id;
+    }
+
+    public boolean canInteract() {
+        return canInteract;
+    }
+
+    public boolean canAttack() {
+        return canAttack;
+    }
+
+    public boolean canUse() {
+        return canUse;
+    }
+
+    public boolean hasInventory() {
+        return hasInventory;
     }
 }

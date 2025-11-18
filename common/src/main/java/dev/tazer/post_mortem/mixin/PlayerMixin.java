@@ -6,12 +6,17 @@ import dev.tazer.post_mortem.entity.SoulState;
 import dev.tazer.post_mortem.entity.SpiritAnchor;
 import dev.tazer.post_mortem.mixininterface.PlayerExtension;
 import dev.tazer.post_mortem.registry.keys.PMDamageTypes;
+import dev.tazer.post_mortem.registry.keys.PMTags;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -114,6 +119,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
 
     @Unique
     protected void onSoulStateUpdated(SoulState soulState) {
+        if (soulState == SoulState.DOWNED) downedTime = pm$player.tickCount;
     }
 
     @Unique
@@ -143,8 +149,8 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     public void setAnchor(@Nullable SpiritAnchor spiritAnchor) {
         SynchedEntityData data = pm$player.getEntityData();
         if (spiritAnchor != null) {
-            data.set(ENTITY_ANCHOR, Optional.ofNullable(spiritAnchor.uuid()));
-            data.set(BLOCK_ANCHOR, Optional.ofNullable(spiritAnchor.globalPos()));
+            data.set(ENTITY_ANCHOR, spiritAnchor.uuid());
+            data.set(BLOCK_ANCHOR, spiritAnchor.globalPos());
             data.set(ANCHOR_TYPE, OptionalInt.of(spiritAnchor.type().id()));
         } else {
             data.set(ENTITY_ANCHOR, Optional.empty());
@@ -213,6 +219,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
         }
     }
 
+    // TODO: review
     @Override
     protected void pm$onInsideBlock(BlockState state, CallbackInfo ci) {
         super.pm$onInsideBlock(state, ci);
@@ -244,7 +251,37 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void tick(CallbackInfo ci) {
-        if (pm$player.getSoulState() == SoulState.SPIRIT || pm$player.getSoulState() == SoulState.MANIFESTATION) {
+        if (getAnchor() != null) {
+            GlobalPos anchorLocation = getAnchor().getPos(pm$player.level());
+
+            if (anchorLocation != null) {
+                Vec3 playerPos = pm$player.position();
+                Vec3 anchorPos = anchorLocation.pos().getCenter();
+                Vec3 motion = pm$player.getDeltaMovement();
+                double x = motion.x;
+                double y = motion.y;
+                double z = motion.z;
+
+                // TODO: have slowdown and consider direction, keep axes separate
+                Vec3 projected = playerPos.add(motion);
+                if (!pm$player.level().getBiome(BlockPos.containing(projected)).is(PMTags.SPIRITS_ROAM_IN)) {
+                    Vec3 newMotion = new Vec3(0, 0, 0);
+                    if (x != 0) {
+                        projected = playerPos.add(x, 0, 0);
+                        if (Mth.abs((float) (anchorPos.x - projected.x)) < 20) newMotion = newMotion.with(Direction.Axis.X, x);
+                    }
+                    if (y != 0) {
+                        projected = playerPos.add(0, y, 0);
+                        if (Mth.abs((float) (anchorPos.y - projected.y)) < 20) newMotion = newMotion.with(Direction.Axis.Y, y);
+                    }
+                    if (z != 0) {
+                        projected = playerPos.add(0, 0, z);
+                        if (Mth.abs((float) (anchorPos.z - projected.z)) < 20) newMotion = newMotion.with(Direction.Axis.Z, z);
+                    }
+
+                    pm$player.setDeltaMovement(newMotion);
+                }
+            }
         }
 
         if (!pm$player.isDeadOrDying()) {
@@ -255,12 +292,32 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
             }
 
             if (soulState == SoulState.DOWNED) {
-                downedTime++;
-
-                if (downedTime % (20 + pm$player.getFoodData().getFoodLevel() * 4) == 0) {
+                if ((pm$player.tickCount - downedTime) % (20 + pm$player.getFoodData().getFoodLevel() * 4) == 0) {
                     pm$player.hurt(PMDamageTypes.getSimpleDamageSource(pm$player.level(), PMDamageTypes.BLEED), 1);
                 }
             }
         }
     }
+
+    @Inject(method = "canTakeItem", at = @At("RETURN"), cancellable = true)
+    private void canTakeItem(ItemStack itemstack, CallbackInfoReturnable<Boolean> cir) {
+        if (cir.getReturnValue() && !getSoulState().hasInventory()) cir.setReturnValue(false);
+    }
+
+    @Inject(method = "mayUseItemAt", at = @At("RETURN"), cancellable = true)
+    private void mayUseItemAt(BlockPos pos, Direction facing, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+        if (cir.getReturnValue() && !getSoulState().canUse()) cir.setReturnValue(false);
+    }
+
+    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
+    private void getDisplayName(CallbackInfoReturnable<Component> cir) {
+        if (getSoulState() != SoulState.ALIVE && getSoulState() != SoulState.DOWNED) cir.setReturnValue(cir.getReturnValue().copy().withColor(0xdde2f0));
+    }
+
+    @Override
+    protected boolean canChangeLevel() {
+        return getAnchor() == null;
+    }
+
+    // TODO: disable spirit collision
 }

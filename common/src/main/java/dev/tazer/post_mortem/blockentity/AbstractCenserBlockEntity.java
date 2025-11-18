@@ -11,10 +11,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public abstract class AbstractCenserBlockEntity extends BlockEntity {
-    public UUID spirit;
+    public Optional<UUID> spirit = Optional.empty();
 
     public AbstractCenserBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
@@ -24,26 +25,26 @@ public abstract class AbstractCenserBlockEntity extends BlockEntity {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
 
-        if (tag.contains("Spirit")) spirit = tag.getUUID("Spirit");
+        if (tag.contains("Spirit")) spirit = Optional.of(tag.getUUID("Spirit"));
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
 
-        if (spirit != null) tag.putUUID("Spirit", spirit);
+        spirit.ifPresent(uuid -> tag.putUUID("Spirit", uuid));
     }
 
     public void removeLink() {
         if (level != null) {
-            spirit = null;
+            spirit = Optional.empty();
             level.setBlockAndUpdate(worldPosition, getBlockState().setValue(AbstractCenserBlock.LINK_STATE, CenserLinkState.ABSENT));
         }
     }
 
     public void addLink(Player player) {
         if (level != null) {
-            spirit = player.getUUID();
+            spirit = Optional.of(player.getUUID());
             level.setBlockAndUpdate(worldPosition, getBlockState().setValue(AbstractCenserBlock.LINK_STATE, CenserLinkState.STRONG));
             player.setSoulState(SoulState.MANIFESTATION);
         }

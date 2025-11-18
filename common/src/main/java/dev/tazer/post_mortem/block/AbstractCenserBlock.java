@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractCenserBlock extends BaseEntityBlock {
     public static final EnumProperty<CenserLinkState> LINK_STATE = EnumProperty.create("link", CenserLinkState.class);
+    // TODO: take bound player and put them in censer
 
     public AbstractCenserBlock(Properties properties) {
         super(properties);
@@ -34,16 +35,18 @@ public abstract class AbstractCenserBlock extends BaseEntityBlock {
         SpiritAnchor anchor = player.getAnchor();
 
         if ((player.getSoulState() == SoulState.SPIRIT || player.getSoulState() == SoulState.MANIFESTATION) && level.getBlockEntity(pos) instanceof AbstractCenserBlockEntity censer) {
-            if (censer.spirit == null) {
+            if (censer.spirit.isEmpty()) {
                 if (anchor != null) {
                     GlobalPos globalPos = anchor.getPos(level);
                     if (globalPos != null && globalPos.dimension() == level.dimension() && globalPos.pos() == pos) return InteractionResult.FAIL;
                 }
 
                 player.setAnchor(new SpiritAnchor(null, GlobalPos.of(level.dimension(), pos), AnchorType.CENSER));
-            } else if (censer.spirit == player.getUUID()) {
+            } else if (censer.spirit.get() == player.getUUID()) {
                 player.setAnchor(null);
             }
+
+            return InteractionResult.SUCCESS;
         }
 
         return InteractionResult.FAIL;
@@ -51,8 +54,8 @@ public abstract class AbstractCenserBlock extends BaseEntityBlock {
 
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!newState.is(this) && level.getBlockEntity(pos) instanceof AbstractCenserBlockEntity censer && censer.spirit != null) {
-            if (level.getPlayerByUUID(censer.spirit) instanceof ServerPlayer player) {
+        if (!newState.is(this) && level.getBlockEntity(pos) instanceof AbstractCenserBlockEntity censer && censer.spirit.isPresent()) {
+            if (level.getPlayerByUUID(censer.spirit.get()) instanceof ServerPlayer player) {
                 player.setAnchor(null);
             }
         }

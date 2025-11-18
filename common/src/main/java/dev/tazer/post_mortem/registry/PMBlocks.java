@@ -23,7 +23,7 @@ public class PMBlocks {
 
     public static final Block LIFEBUD = registerBlock("lifebud", new Block(ofFullCopy(Blocks.HEAVY_CORE)));
     public static final Block FLESH = registerBlock("flesh", new Block(ofFullCopy(Blocks.SCULK)));
-    public static final Block BUDDING_FLESH = registerBlock("budding_flesh", new Block(ofFullCopy(FLESH)));
+    public static final BuddingFleshBlock BUDDING_FLESH = registerBlock("budding_flesh", new BuddingFleshBlock(ofFullCopy(FLESH)));
 
     public static void register() {}
 }
