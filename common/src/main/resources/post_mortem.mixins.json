@@ -18,6 +18,7 @@
   "client": [
     "client.DeathScreenMixin",
     "client.GuiMixin",
+    "client.HeartTypeEnumExtension",
     "client.MinecraftMixin",
     "client.MouseHandlerMixin",
     "client.MultiPlayerGameModeMixin",
