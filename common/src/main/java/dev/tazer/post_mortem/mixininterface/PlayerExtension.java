@@ -5,6 +5,8 @@ import dev.tazer.post_mortem.entity.SpiritAnchor;
 import net.minecraft.core.GlobalPos;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 public interface PlayerExtension {
 
     /**
@@ -48,6 +50,17 @@ public interface PlayerExtension {
      * @param grave The {@link GlobalPos} grave to set for the player
      */
     default void setGrave(@Nullable GlobalPos grave) {
+        throw new AssertionError("Implemented in Mixin");
+    }
+
+    /**
+     * @return The spirit haunting the player
+     */
+    default @Nullable UUID getSpirit() {
+        throw new AssertionError("Implemented in Mixin");
+    }
+
+    default void setSpirit(@Nullable UUID spirit) {
         throw new AssertionError("Implemented in Mixin");
     }
 }

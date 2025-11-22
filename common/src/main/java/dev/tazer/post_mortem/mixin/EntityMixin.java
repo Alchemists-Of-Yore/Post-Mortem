@@ -17,15 +17,15 @@ public abstract class EntityMixin {
     public abstract Level level();
 
     @Inject(method = "fireImmune", at = @At("RETURN"), cancellable = true)
-    private void pm$fireImmune(CallbackInfoReturnable<Boolean> cir) {
-        if (!cir.getReturnValue()) cir.setReturnValue(isImmuneToFire());
+    private void postmortem$fireImmune(CallbackInfoReturnable<Boolean> cir) {
+        if (!cir.getReturnValue()) cir.setReturnValue(isFireImmune());
     }
 
     @Inject(method = "onInsideBlock", at = @At("TAIL"))
-    protected void pm$onInsideBlock(BlockState state, CallbackInfo ci) {}
+    protected void postmortem$onInsideBlock(BlockState state, CallbackInfo ci) {}
 
     @Unique
-    protected boolean isImmuneToFire() {
+    protected boolean isFireImmune() {
         return false;
     }
 }

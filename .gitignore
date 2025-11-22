@@ -1,5 +1,6 @@
 # eclipse
 bin
+eclipse
 *.launch
 .settings
 .metadata
@@ -14,12 +15,14 @@ out
 .idea/*
 !.idea/scopes
 
+# vscode
+.vscode
+
 # gradle
 build
 .gradle
 
 # other
-eclipse
 run
 runs
 .cache

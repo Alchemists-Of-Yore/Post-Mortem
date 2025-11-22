@@ -57,9 +57,11 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
 
     @Unique
     private int downedTime = 0;
+    @Unique
+    private UUID spirit;
 
     @Inject(method = "defineSynchedData", at = @At("TAIL"))
-    private void pm$defineSynchedData(SynchedEntityData.Builder builder, CallbackInfo ci) {
+    private void defineSoulData(SynchedEntityData.Builder builder, CallbackInfo ci) {
         builder.define(SOUL_STATE, 0);
         builder.define(ENTITY_ANCHOR, Optional.empty());
         builder.define(BLOCK_ANCHOR, Optional.empty());
@@ -68,7 +70,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
-    private void addSoulStateData(CompoundTag compound, CallbackInfo ci) {
+    private void addSoulData(CompoundTag compound, CallbackInfo ci) {
         compound.putInt("SoulState", getSoulState().id());
 
         GlobalPos grave = getGrave();
@@ -86,10 +88,12 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
                     .resultOrPartial(PostMortem.LOGGER::error)
                     .ifPresent(tag -> compound.put("SpiritAnchor", tag));
         }
+
+        if (spirit != null) compound.putUUID("Spirit", spirit);
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
-    private void readSoulStateData(CompoundTag compound, CallbackInfo ci) {
+    private void readSoulData(CompoundTag compound, CallbackInfo ci) {
         setSoulState(SoulState.byId(compound.getInt("SoulState")));
 
         if (compound.contains("GraveLocation")) {
@@ -107,11 +111,13 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
                     .orElse(null)
             );
         }
+
+        if (compound.contains("Spirit")) setSpirit(compound.getUUID("Spirit"));
     }
 
     @Override
-    protected void pm$onSyncedDataUpdated(EntityDataAccessor<?> key, CallbackInfo ci) {
-        super.pm$onSyncedDataUpdated(key, ci);
+    protected void onSoulDataUpdated(EntityDataAccessor<?> key, CallbackInfo ci) {
+        super.onSoulDataUpdated(key, ci);
 
         if (key.equals(SOUL_STATE)) onSoulStateUpdated(getSoulState());
         if (key.equals(ENTITY_ANCHOR) || key.equals(BLOCK_ANCHOR) || key.equals(ANCHOR_TYPE)) onAnchorUpdated(getAnchor());
@@ -123,8 +129,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     }
 
     @Unique
-    protected void onAnchorUpdated(SpiritAnchor anchor) {
-    }
+    protected void onAnchorUpdated(SpiritAnchor anchor) {}
 
     @Override
     public SoulState getSoulState() {
@@ -170,6 +175,11 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     }
 
     @Override
+    public UUID getSpirit() {
+        return spirit;
+    }
+
+    @Override
     protected ItemStack findTotem() {
         Inventory inventory = pm$player.getInventory();
         for (int i = 0; i < inventory.items.size(); ++i) {
@@ -202,7 +212,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     }
 
     @Override
-    protected void pm$canBeSeenByAnyone(CallbackInfoReturnable<Boolean> cir) {
+    protected void postmortem$canBeSeenByAnyone(CallbackInfoReturnable<Boolean> cir) {
         if (cir.getReturnValue()) {
             SoulState state = getSoulState();
             if (state == SoulState.DOWNED || state == SoulState.SPIRIT) {
@@ -221,8 +231,8 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
 
     // TODO: review
     @Override
-    protected void pm$onInsideBlock(BlockState state, CallbackInfo ci) {
-        super.pm$onInsideBlock(state, ci);
+    protected void postmortem$onInsideBlock(BlockState state, CallbackInfo ci) {
+        super.postmortem$onInsideBlock(state, ci);
 
         if (state.getBlock() instanceof BaseFireBlock && getSoulState() == SoulState.SPIRIT) {
             Vec3 vec3 = pm$player.getDeltaMovement();
@@ -237,7 +247,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     }
 
     @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
-    private void cancelHurtWhenSpirit(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void maybeCancelHurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if (getSoulState() == SoulState.SPIRIT) {
             cir.setReturnValue(false);
             cir.cancel();
@@ -245,41 +255,42 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     }
 
     @Override
-    protected boolean isImmuneToFire() {
+    protected boolean isFireImmune() {
         return getSoulState() == SoulState.SPIRIT;
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
-    private void tick(CallbackInfo ci) {
+    private void postmortem$tick(CallbackInfo ci) {
         if (getAnchor() != null) {
             GlobalPos anchorLocation = getAnchor().getPos(pm$player.level());
 
             if (anchorLocation != null) {
                 Vec3 playerPos = pm$player.position();
                 Vec3 anchorPos = anchorLocation.pos().getCenter();
-                Vec3 motion = pm$player.getDeltaMovement();
-                double x = motion.x;
-                double y = motion.y;
-                double z = motion.z;
 
-                // TODO: have slowdown and consider direction, keep axes separate
-                Vec3 projected = playerPos.add(motion);
-                if (!pm$player.level().getBiome(BlockPos.containing(projected)).is(PMTags.SPIRITS_ROAM_IN)) {
-                    Vec3 newMotion = new Vec3(0, 0, 0);
-                    if (x != 0) {
-                        projected = playerPos.add(x, 0, 0);
-                        if (Mth.abs((float) (anchorPos.x - projected.x)) < 20) newMotion = newMotion.with(Direction.Axis.X, x);
-                    }
-                    if (y != 0) {
-                        projected = playerPos.add(0, y, 0);
-                        if (Mth.abs((float) (anchorPos.y - projected.y)) < 20) newMotion = newMotion.with(Direction.Axis.Y, y);
-                    }
-                    if (z != 0) {
-                        projected = playerPos.add(0, 0, z);
-                        if (Mth.abs((float) (anchorPos.z - projected.z)) < 20) newMotion = newMotion.with(Direction.Axis.Z, z);
-                    }
+                if (!pm$player.level().getBiome(pm$player.blockPosition()).is(PMTags.SPIRITS_ROAM_IN)) {
+                    Vec3 diff = playerPos.subtract(anchorPos);
+                    double dist = diff.length();
 
-                    pm$player.setDeltaMovement(newMotion);
+                    if (dist > 0.01) {
+                        Vec3 dir = diff.normalize();
+                        Vec3 motion = pm$player.getDeltaMovement();
+                        double speedAway = motion.dot(dir);
+
+                        if (speedAway > 0) {
+                            double limit = 20;
+                            double buffer = 3;
+
+                            if (dist > limit - buffer) {
+                                double factor = (limit - dist) / buffer;
+                                factor = Mth.clamp(factor, 0, 1);
+
+                                double newSpeedAway = speedAway * factor;
+                                Vec3 newMotion = motion.subtract(dir.scale(speedAway)).add(dir.scale(newSpeedAway));
+                                pm$player.setDeltaMovement(newMotion);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -300,17 +311,17 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerExt
     }
 
     @Inject(method = "canTakeItem", at = @At("RETURN"), cancellable = true)
-    private void canTakeItem(ItemStack itemstack, CallbackInfoReturnable<Boolean> cir) {
+    private void postmortem$canTakeItem(ItemStack itemstack, CallbackInfoReturnable<Boolean> cir) {
         if (cir.getReturnValue() && !getSoulState().hasInventory()) cir.setReturnValue(false);
     }
 
     @Inject(method = "mayUseItemAt", at = @At("RETURN"), cancellable = true)
-    private void mayUseItemAt(BlockPos pos, Direction facing, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+    private void postmortem$mayUseItemAt(BlockPos pos, Direction facing, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
         if (cir.getReturnValue() && !getSoulState().canUse()) cir.setReturnValue(false);
     }
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
-    private void getDisplayName(CallbackInfoReturnable<Component> cir) {
+    private void colorDeadDisplayName(CallbackInfoReturnable<Component> cir) {
         if (getSoulState() != SoulState.ALIVE && getSoulState() != SoulState.DOWNED) cir.setReturnValue(cir.getReturnValue().copy().withColor(0xdde2f0));
     }
 

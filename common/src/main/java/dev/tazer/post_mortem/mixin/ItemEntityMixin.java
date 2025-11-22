@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin {
     @Inject(method = "playerTouch", at = @At("HEAD"), cancellable = true)
-    private void cancelMaybe(Player player, CallbackInfo ci) {
+    private void cancelSpiritTouch(Player player, CallbackInfo ci) {
         if (!player.getSoulState().canUse()) ci.cancel();
     }
 }

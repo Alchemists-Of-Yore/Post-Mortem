@@ -6,6 +6,7 @@ import dev.tazer.post_mortem.entity.AnchorType;
 import dev.tazer.post_mortem.entity.SoulState;
 import dev.tazer.post_mortem.entity.SpiritAnchor;
 import dev.tazer.post_mortem.mixininterface.ServerPlayerExtension;
+import dev.tazer.post_mortem.registry.keys.PMTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
@@ -13,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Player;
@@ -49,6 +51,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
     protected void onSoulStateUpdated(SoulState soulState) {
         super.onSoulStateUpdated(soulState);
 
+        // Reset all relevant attributes before applying new modifiers
         AttributeMap attributeMap = pm$player.getAttributes();
         List<Holder<Attribute>> attributes = List.of(
                 Attributes.MAX_HEALTH,
@@ -57,7 +60,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
                 Attributes.BLOCK_INTERACTION_RANGE
         );
 
-        for(Holder<Attribute> attribute : attributes) {
+        for (Holder<Attribute> attribute : attributes) {
             AttributeInstance attributeinstance = attributeMap.getInstance(attribute);
             if (attributeinstance != null) {
                 attributeinstance.removeModifiers();
@@ -75,14 +78,13 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
                     Component component = pm$player.getCombatTracker().getDeathMessage();
 
                     Team team = pm$player.getTeam();
+                    PlayerList playerList = pm$player.server.getPlayerList();
                     if (team == null || team.getDeathMessageVisibility() == Team.Visibility.ALWAYS) {
-                        pm$player.server.getPlayerList().broadcastSystemMessage(component, false);
+                        playerList.broadcastSystemMessage(component, false);
                     } else {
                         switch (team.getDeathMessageVisibility()) {
-                            case HIDE_FOR_OTHER_TEAMS ->
-                                    pm$player.server.getPlayerList().broadcastSystemToTeam(pm$player, component);
-                            case HIDE_FOR_OWN_TEAM ->
-                                    pm$player.server.getPlayerList().broadcastSystemToAllExceptTeam(pm$player, component);
+                            case HIDE_FOR_OTHER_TEAMS -> playerList.broadcastSystemToTeam(pm$player, component);
+                            case HIDE_FOR_OWN_TEAM -> playerList.broadcastSystemToAllExceptTeam(pm$player, component);
                         }
                     }
                 }
@@ -106,10 +108,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
                 pm$player.getInventory().dropAll();
             }
             case MANIFESTATION -> {
-
-                newAttributeMap = Map.of(
-                        Attributes.MAX_HEALTH, -10D
-                );
+                newAttributeMap = Map.of(Attributes.MAX_HEALTH, -10D);
 
                 pm$player.setHealth(pm$player.getMaxHealth());
             }
@@ -130,18 +129,27 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
     protected void onAnchorUpdated(SpiritAnchor anchor) {
         super.onAnchorUpdated(anchor);
 
+        // Return manifestation to spirit if the anchor is removed
         if (anchor == null) {
             if (getSoulState() == SoulState.MANIFESTATION) {
                 setSoulState(SoulState.SPIRIT);
             }
         } else {
-            GlobalPos centre = anchor.getPos(pm$player.level());
+            if (anchor.uuid().isPresent()) {
+                Player player = pm$player.level().getPlayerByUUID(anchor.uuid().get());
+                if (player != null) {
+                    player.setSpirit(pm$player.getUUID());
+                }
+            } else {
+                // Link to the new anchor if it's a censer
+                GlobalPos centre = anchor.getPos(pm$player.level());
 
-            if (centre != null) {
-                Level level = pm$player.server.getLevel(centre.dimension());
-                if (level != null) {
-                    if (level.getBlockEntity(centre.pos()) instanceof AbstractCenserBlockEntity censer) {
-                        censer.addLink(pm$player);
+                if (centre != null) {
+                    Level level = pm$player.server.getLevel(centre.dimension());
+                    if (level != null) {
+                        if (level.getBlockEntity(centre.pos()) instanceof AbstractCenserBlockEntity censer) {
+                            censer.addLink(pm$player);
+                        }
                     }
                 }
             }
@@ -150,14 +158,21 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
         validateAnchor();
     }
 
+    /**
+     * Persists soul state and grave location when copying player data
+     */
     @Inject(method = "restoreFrom", at = @At("TAIL"))
-    private void restoreFrom(ServerPlayer dead, boolean keepEverything, CallbackInfo ci) {
+    private void restoreSoulData(ServerPlayer dead, boolean keepEverything, CallbackInfo ci) {
         setSoulState(dead.getSoulState());
         setGrave(dead.getGrave());
     }
 
+    /**
+     * Overrides the respawn position logic to force the player to respawn at their
+     * death location.
+     */
     @Inject(method = "findRespawnPositionAndUseSpawnBlock", at = @At("HEAD"), cancellable = true)
-    private void findRespawnAndUseSpawnBlock(boolean keepInventory, DimensionTransition.PostDimensionTransition postDimensionTransition, CallbackInfoReturnable<DimensionTransition> cir) {
+    private void respawnAtDeathLocation(boolean keepInventory, DimensionTransition.PostDimensionTransition postDimensionTransition, CallbackInfoReturnable<DimensionTransition> cir) {
         ServerLevel level = pm$player.getLastDeathLocation().map(GlobalPos::dimension).map(pm$player.server::getLevel).orElse(pm$player.serverLevel());
         BlockPos pos = pm$player.getLastDeathLocation().map(GlobalPos::pos).orElse(pm$player.blockPosition());
         cir.setReturnValue(new DimensionTransition(level, Vec3.atCenterOf(pos), Vec3.ZERO, pm$player.getYRot(), 0, postDimensionTransition));
@@ -165,7 +180,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
     }
 
     @Inject(method = "setGameMode", at = @At("RETURN"))
-    private void reviveIfNotSurvival(GameType gameMode, CallbackInfoReturnable<Boolean> cir) {
+    private void maybeRevive(GameType gameMode, CallbackInfoReturnable<Boolean> cir) {
         if (!gameMode.isSurvival() && getSoulState() == SoulState.DOWNED) setSoulState(SoulState.ALIVE);
     }
 
@@ -175,13 +190,20 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
 
         if (previous != null) {
             if (previous.type() != AnchorType.CENSER && previous.type() != AnchorType.PLAYER) lastAnchor = previous.type();
-            GlobalPos centre = previous.getPos(pm$player.level());
+            if (previous.uuid().isPresent()) {
+                Player player = pm$player.level().getPlayerByUUID(previous.uuid().get());
+                if (player != null) {
+                    player.setSpirit(null);
+                }
+            } else {
+                GlobalPos centre = previous.getPos(pm$player.level());
 
-            if (centre != null) {
-                Level level = pm$player.server.getLevel(centre.dimension());
-                if (level != null) {
-                    if (level.getBlockEntity(centre.pos()) instanceof AbstractCenserBlockEntity censer) {
-                        censer.removeLink();
+                if (centre != null) {
+                    Level level = pm$player.server.getLevel(centre.dimension());
+                    if (level != null) {
+                        if (level.getBlockEntity(centre.pos()) instanceof AbstractCenserBlockEntity censer) {
+                            censer.removeLink();
+                        }
                     }
                 }
             }
@@ -204,7 +226,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
         UUID uuid = null;
         GlobalPos pos = null;
 
-         switch (type) {
+        switch (type) {
             case DEATH -> pos = pm$player.getLastDeathLocation().orElse(null);
             case GRAVESTONE -> {
                 GlobalPos grave = pm$player.getGrave();
@@ -242,26 +264,32 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
 
                 if (validPlayer != null) uuid = validPlayer.getUUID();
             }
-             default -> {
-                 return null;
+            default -> {
+                return null;
             }
-         }
+        }
 
-         return uuid != null || pos != null ? new SpiritAnchor(uuid, pos, type) : null;
+        return uuid != null || pos != null ? new SpiritAnchor(uuid, pos, type) : null;
     }
 
+    /**
+     * Ensures the player is within range of their anchor.
+     * If they are too far or in the wrong dimension, they are teleported back.
+     */
     @Override
     public void validateAnchor() {
-        SpiritAnchor anchor = pm$player.getAnchor();
-        if (anchor != null) {
-            GlobalPos centre = anchor.getPos(pm$player.level());
+        if (!pm$player.level().getBiome(pm$player.blockPosition()).is(PMTags.SPIRITS_ROAM_IN)) {
+            SpiritAnchor anchor = pm$player.getAnchor();
+            if (anchor != null) {
+                GlobalPos centre = anchor.getPos(pm$player.level());
 
-            if (centre != null) {
-                Vec3 position = Vec3.atCenterOf(centre.pos());
-                if (pm$player.level().dimension() != centre.dimension() || pm$player.distanceToSqr(position) > 20 * 20) {
-                    ServerLevel level = pm$player.server.getLevel(centre.dimension());
-                    if (level != null) {
-                        pm$player.teleportTo(level, position.x, position.y, position.z, pm$player.getYRot(), pm$player.getXRot());
+                if (centre != null) {
+                    Vec3 position = Vec3.atCenterOf(centre.pos());
+                    if (pm$player.level().dimension() != centre.dimension() || pm$player.distanceToSqr(position) > 20 * 20) {
+                        ServerLevel level = pm$player.server.getLevel(centre.dimension());
+                        if (level != null) {
+                            pm$player.teleportTo(level, position.x, position.y, position.z, pm$player.getYRot(), pm$player.getXRot());
+                        }
                     }
                 }
             }
@@ -269,7 +297,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements ServerPla
     }
 
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
-    private void attack(Entity targetEntity, CallbackInfo ci) {
+    private void maybeCancelAttack(Entity targetEntity, CallbackInfo ci) {
         if (!getSoulState().canAttack()) ci.cancel();
     }
 }

@@ -33,10 +33,10 @@ public abstract class LivingEntityMixin extends EntityMixin {
     }
 
     @Inject(method = "canBeSeenByAnyone", at = @At("RETURN"), cancellable = true)
-    protected void pm$canBeSeenByAnyone(CallbackInfoReturnable<Boolean> cir) {}
+    protected void postmortem$canBeSeenByAnyone(CallbackInfoReturnable<Boolean> cir) {}
 
     @Inject(method = "onSyncedDataUpdated", at = @At("TAIL"))
-    protected void pm$onSyncedDataUpdated(EntityDataAccessor<?> key, CallbackInfo ci) {}
+    protected void onSoulDataUpdated(EntityDataAccessor<?> key, CallbackInfo ci) {}
 
     @Inject(method = "canUsePortal", at = @At("RETURN"), cancellable = true)
     private void canUsePortal(boolean allowPassengers, CallbackInfoReturnable<Boolean> cir) {
@@ -48,6 +48,10 @@ public abstract class LivingEntityMixin extends EntityMixin {
         return ItemStack.EMPTY;
     }
 
+    /**
+     * @param damageSource The damage source that caused the damage
+     * @return {@code true} if the entity should survive fatal damage
+     */
     @Unique
     protected boolean shouldStayAlive(DamageSource damageSource) {
         return false;

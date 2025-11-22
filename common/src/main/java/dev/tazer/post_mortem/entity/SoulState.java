@@ -38,18 +38,30 @@ public enum SoulState {
         return this.id;
     }
 
+    /**
+     * @return {@code true} if the player can interact with blocks and entities in this state.
+     */
     public boolean canInteract() {
         return canInteract;
     }
 
+    /**
+     * @return {@code true} if the player can attack entities in this state.
+     */
     public boolean canAttack() {
         return canAttack;
     }
 
+    /**
+     * @return {@code true} if the player can use items in this state.
+     */
     public boolean canUse() {
         return canUse;
     }
 
+    /**
+     * @return {@code true} if the player retains their inventory in this state.
+     */
     public boolean hasInventory() {
         return hasInventory;
     }

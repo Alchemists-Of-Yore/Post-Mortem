@@ -33,7 +33,7 @@ public abstract class PlayerListMixin {
     public abstract ServerPlayer getPlayer(UUID playerUUID);
 
     @ModifyVariable(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V", at = @At("HEAD"), argsOnly = true)
-    private PlayerChatMessage colorSpiritMessages(PlayerChatMessage message, @Local(argsOnly = true) ServerPlayer sender) {
+    private PlayerChatMessage colorDeadMessages(PlayerChatMessage message, @Local(argsOnly = true) ServerPlayer sender) {
         if (sender != null && sender.getSoulState() != SoulState.ALIVE && sender.getSoulState() != SoulState.DOWNED) {
             message = message.withUnsignedContent(Component.literal(message.signedContent()).withColor(0xdde2f0));
         }
@@ -42,10 +42,10 @@ public abstract class PlayerListMixin {
     }
 
     @Inject(method = "remove", at = @At("HEAD"))
-    private void onPlayerRemoved(ServerPlayer player, CallbackInfo ci) {
+    private void postmortem$remove(ServerPlayer player, CallbackInfo ci) {
         SpiritAnchor anchor = player.getAnchor();
 
-        if (anchor != null && anchor.uuid().isEmpty()) {
+        if (anchor != null) {
             GlobalPos pos = anchor.getPos(player.level());
 
             if (pos != null) {
@@ -58,7 +58,7 @@ public abstract class PlayerListMixin {
     }
 
     @Inject(method = "placeNewPlayer", at = @At("TAIL"))
-    private void onPlayerPlaced(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
+    private void postmortem$placeNewPlayer(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
         SpiritAnchor anchor = player.getAnchor();
 
         if (anchor != null) {

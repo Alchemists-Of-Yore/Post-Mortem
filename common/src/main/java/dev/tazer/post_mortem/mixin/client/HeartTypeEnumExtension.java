@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
@@ -28,10 +27,6 @@ public abstract class HeartTypeEnumExtension {
     private static final Gui.HeartType MANIFESTATION = addHeartType("MANIFESTATION", PostMortem.location("hearts/manifestation_heart"));
     @Unique
     private static final Gui.HeartType POSSESSION = addHeartType("POSSESSION", PostMortem.location("hearts/possession_heart"));
-
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void c(String full, int fullBlinking, ResourceLocation half, ResourceLocation halfBlinking, ResourceLocation hardcoreFull, ResourceLocation hardcoreBlinking, ResourceLocation hardcoreHalf, ResourceLocation hardcoreHalfBlinking, ResourceLocation par9, ResourceLocation par10, CallbackInfo ci) {
-    }
 
     @Invoker("<init>")
     private static Gui.HeartType invokeInit(String name, int id, ResourceLocation full, ResourceLocation fullBlinking, ResourceLocation half, ResourceLocation halfBlinking, ResourceLocation hardcoreFull, ResourceLocation hardcoreBlinking, ResourceLocation hardcoreHalf, ResourceLocation hardcoreHalfBlinking) {

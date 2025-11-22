@@ -14,12 +14,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Contains either a {@link UUID} or a {@link GlobalPos}
- * The present parameter acts as the centre for the haunting area -
- *  the area in which a spirit can move in and interact with the world
+ * Contains either a {@link UUID} (for an entity anchor) or a {@link GlobalPos} (for a block anchor).
+ * This anchor acts as the center for the haunting area - the area in which a spirit can move in and interact with the world.
  *
- * @param uuid The {@link UUID} of the entity the spirit is anchored to, null if not present
- * @param globalPos The {@link GlobalPos} the spirit is anchored to, null if not present
+ * @param uuid      The {@link UUID} of the entity the spirit is anchored to, or empty if not anchored to an entity.
+ * @param globalPos The {@link GlobalPos} the spirit is anchored to, or empty if not anchored to a block.
+ * @param type      The {@link AnchorType} of this anchor.
  */
 public record SpiritAnchor(Optional<UUID> uuid, Optional<GlobalPos> globalPos, AnchorType type) {
     public static final Codec<UUID> UUID_CODEC = Codec.STRING.xmap(UUID::fromString, UUID::toString);
